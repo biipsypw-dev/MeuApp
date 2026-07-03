@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--=================================================
+    LAYOUT PRINCIPAL — activity_main.xml
+    Estrutura em duas camadas (FrameLayout raiz):
+      Camada 1: Conteúdo principal (seção superior + inferior)
+      Camada 2: Menu lateral sobreposto (tela toda, oculto por padrão)
+    Sem dependências externas — apenas Views nativas Android
+=================================================-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <!--═══════════════════════════════════════════
+        CAMADA 1 — CONTEÚDO PRINCIPAL
+        LinearLayout vertical divide a tela em dois:
+          • Seção Superior (50%): relógio
+          • Seção Inferior (50%): status + botão menu
+    ═══════════════════════════════════════════-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <!--── SEÇÃO SUPERIOR: RELÓGIO ──────────────
+            Ocupa 50% da altura via layout_weight=1
+            Conteúdo centralizado com gravity center
+        ─────────────────────────────────────────-->
+        <FrameLayout
+            android:id="@+id/section_top"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/section_top">
+
+            <!-- Texto do relógio — atualizado em MainActivity.java -->
+            <TextView
+                android:id="@+id/tv_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="00:00:00"
+                android:textSize="56sp"
+                android:textColor="@color/text_light"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.05" />
+
+        </FrameLayout>
+
+
+        <!--── SEÇÃO INFERIOR: STATUS + BOTÃO MENU ──
+            Ocupa 50% da altura via layout_weight=1
+            Botão de menu no canto superior esquerdo
+            Mensagem de status centralizada
+        ─────────────────────────────────────────-->
+        <FrameLayout
+            android:id="@+id/section_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/section_bottom">
+
+            <!--── Botão Abrir Menu ──────────────────
+                Posicionado: topo + esquerda da seção
+                Caractere ☰ (trigram) como ícone nativo
+                Não requer drawable externo
+            ─────────────────────────────────────-->
+            <Button
+                android:id="@+id/btn_menu"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="8dp"
+                android:text="☰"
+                android:textSize="26sp"
+                android:textColor="@color/text_light"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu_desc"
+                android:padding="0dp" />
+
+            <!--── Mensagem de Status ────────────────
+                Centralizada na seção inferior
+            ─────────────────────────────────────-->
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/status_msg"
+                android:textSize="22sp"
+                android:textColor="@color/text_light" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+    <!--══ FIM CAMADA 1 ═════════════════════════-->
+
+
+    <!--═══════════════════════════════════════════
+        CAMADA 2 — MENU LATERAL (TELA TODA)
+        Sobrepõe o conteúdo principal (FrameLayout)
+        Padrão: visibility="gone" (invisível)
+        Ativado por: btn_menu em MainActivity.java
+        Fechado por: btn_close_drawer ou botão Voltar
+    ═══════════════════════════════════════════-->
+    <FrameLayout
+        android:id="@+id/nav_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/drawer_bg"
+        android:visibility="gone">
+
+        <!--── Botão Fechar Menu ─────────────────────
+            Mesmo posicionamento do btn_menu (espelhado)
+            Caractere ✕ como ícone nativo
+        ─────────────────────────────────────────-->
+        <Button
+            android:id="@+id/btn_close_drawer"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:text="✕"
+            android:textSize="22sp"
+            android:textColor="@color/text_light"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/close_menu_desc"
+            android:padding="0dp" />
+
+        <!--── Conteúdo Central do Menu ─────────────
+            Título + mensagem de status do menu
+            Centralizado vertical e horizontalmente
+        ─────────────────────────────────────────-->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Título do menu -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drawer_title"
+                android:textSize="32sp"
+                android:textColor="@color/text_light"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <!-- Separador visual (linha horizontal) -->
+            <View
+                android:layout_width="120dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@color/divider" />
+
+            <!-- Mensagem de status do menu -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/drawer_status"
+                android:textSize="18sp"
+                android:textColor="@color/text_light_dim" />
+
+        </LinearLayout>
+        <!--══ FIM Conteúdo Central ══════════════-->
+
+    </FrameLayout>
+    <!--══ FIM CAMADA 2 ═════════════════════════-->
+
+
+</FrameLayout>
