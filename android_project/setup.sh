@@ -103,36 +103,115 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
 
         </FrameLayout>
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/section_bottom"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:orientation="vertical"
             android:background="@color/section_bottom">
 
-            <Button
-                android:id="@+id/btn_menu"
-                android:layout_width="56dp"
+            <!-- BARRA DE TAREFAS -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_gravity="top|start"
-                android:layout_margin="8dp"
-                android:text="&#9776;"
-                android:textSize="26sp"
-                android:textColor="@color/text_light"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/menu_desc"
-                android:padding="0dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/section_top"
+                android:paddingHorizontal="8dp">
 
-            <TextView
-                android:id="@+id/tv_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/status_msg"
-                android:textSize="22sp"
-                android:textColor="@color/text_light" />
+                <Button
+                    android:id="@+id/btn_menu"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="&#9776;"
+                    android:textSize="26sp"
+                    android:textColor="@color/text_light"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/menu_desc"
+                    android:padding="0dp" />
 
-        </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/app_name"
+                    android:textColor="@color/text_light"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- ÁREA DOS BOTÕES -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <!-- Linha superior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btn_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="8dp"
+                        android:minHeight="80dp"
+                        android:padding="16dp"
+                        android:text="Botão 1" />
+
+                    <Button
+                        android:id="@+id/btn_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="8dp"
+                        android:minHeight="80dp"
+                        android:padding="16dp"
+                        android:text="Botão 2" />
+                </LinearLayout>
+
+                <!-- Linha inferior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btn_3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="8dp"
+                        android:minHeight="80dp"
+                        android:padding="16dp"
+                        android:text="Botão 3" />
+
+                    <Button
+                        android:id="@+id/btn_4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_margin="8dp"
+                        android:minHeight="80dp"
+                        android:padding="16dp"
+                        android:text="Botão 4" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
