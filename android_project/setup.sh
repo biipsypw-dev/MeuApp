@@ -504,9 +504,101 @@ ENDOFFILE
 echo "      OK"
 
 #─────────────────────────────────────────────
-# BLOCO 8 — RESULTADO FINAL
+# BLOCO 8 — SCRIPT DE INSTALAÇÃO ADB
 #─────────────────────────────────────────────
-echo "[8/8] Verificando arquivos criados..."
+echo "[8/8] Criando script de instalação install-adb.sh..."
+
+cat > "$PROJECT/install-adb.sh" << 'ENDOFFILE'
+#!/bin/bash
+#=================================================
+# INSTALL-ADB.SH — Instala o APK no celular
+# Uso no Termux: bash install-adb.sh
+#=================================================
+
+APK="./dist/app.apk"
+
+echo ""
+echo "========================================"
+echo "  Instalador do APK"
+echo "========================================"
+echo ""
+
+# Verifica se está no Termux
+if [ -z "$TERMUX_VERSION" ]; then
+    echo "⚠️  Este script foi feito para rodar dentro do Termux."
+    echo "   Se estiver em outro Linux, instale o adb via:"
+    echo "   sudo apt install adb"
+    echo ""
+fi
+
+# Instala o android-tools (adb)
+echo "[1/4] Verificando adb..."
+if ! command -v adb &> /dev/null; then
+    echo "      adb não encontrado. Instalando android-tools..."
+    pkg update -y
+    pkg install android-tools -y
+else
+    echo "      adb já instalado: $(adb version | head -n 1)"
+fi
+
+# Verifica se o APK existe
+echo "[2/4] Verificando APK..."
+if [ ! -f "$APK" ]; then
+    echo "❌ APK não encontrado: $APK"
+    echo "   Rode primeiro: ./build.sh"
+    exit 1
+fi
+
+echo "      APK encontrado: $APK"
+
+# Escolhe modo de instalação
+echo ""
+echo "[3/4] Como deseja instalar?"
+echo ""
+echo "  1) Instalar no próprio celular (via termux-open)"
+echo "  2) Instalar via USB/ADB em outro dispositivo"
+echo ""
+read -p "Opção [1-2]: " opcao
+
+case "$opcao" in
+    1)
+        echo ""
+        echo "[4/4] Abrindo instalador do Android..."
+        termux-open "$APK"
+        echo "✅ Toque em 'Instalar' na tela que abrir."
+        ;;
+    2)
+        echo ""
+        echo "[4/4] Verificando dispositivos ADB..."
+        adb devices
+        echo ""
+        read -p "Pressione ENTER quando o dispositivo estiver conectado e autorizado..."
+        echo ""
+        echo "Instalando APK..."
+        adb install -r "$APK"
+        echo "✅ Instalação concluída."
+        ;;
+    *)
+        echo "❌ Opção inválida."
+        exit 1
+        ;;
+esac
+
+echo ""
+echo "========================================"
+echo "  Pronto!"
+echo "========================================"
+echo ""
+ENDOFFILE
+
+chmod +x "$PROJECT/install-adb.sh"
+
+echo "      OK"
+
+#─────────────────────────────────────────────
+# BLOCO 9 — RESULTADO FINAL
+#─────────────────────────────────────────────
+echo "[9/9] Verificando arquivos criados..."
 echo ""
 
 find "$PROJECT" -type f | sort
@@ -517,7 +609,9 @@ echo "  Projeto criado com sucesso!"
 echo "  Pasta: $(pwd)/$PROJECT"
 echo "========================================"
 echo ""
-echo "  Próximo passo:"
-echo "  cd $PROJECT && ./build.sh"
+echo "  Próximos passos:"
+echo "  cd $PROJECT"
+echo "  ./build.sh"
+echo "  bash install-adb.sh"
 echo "========================================"
 echo ""
