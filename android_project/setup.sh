@@ -18,9 +18,9 @@ echo "========================================"
 #─────────────────────────────────────────────
 echo "[1/8] Criando estrutura de diretórios..."
 
-mkdir -p "$PROJECT/app/src/main/java/com/MeuApp"
-mkdir -p "$PROJECT/app/src/main/res/layout"
-mkdir -p "$PROJECT/app/src/main/res/values"
+mkdir -p "$PROJECT/src/com/MeuApp"
+mkdir -p "$PROJECT/res/layout"
+mkdir -p "$PROJECT/res/values"
 
 echo "      OK"
 
@@ -29,7 +29,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[2/8] Criando AndroidManifest.xml..."
 
-cat > "$PROJECT/app/src/main/AndroidManifest.xml" << 'ENDOFFILE'
+cat > "$PROJECT/AndroidManifest.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.MeuApp">
@@ -65,7 +65,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[3/8] Criando res/layout/activity_main.xml..."
 
-cat > "$PROJECT/app/src/main/res/layout/activity_main.xml" << 'ENDOFFILE'
+cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <!--=================================================
     LAYOUT PRINCIPAL — activity_main.xml
@@ -250,7 +250,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[4/8] Criando java/com/example/MainActivity.java..."
 
-cat > "$PROJECT/app/src/main/java/com/MeuApp/MainActivity.java" << 'ENDOFFILE'
+cat > "$PROJECT/src/com/MeuApp/MainActivity.java" << 'ENDOFFILE'
 package com.MeuApp;
 
 /*=================================================
@@ -504,7 +504,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[5/8] Criando res/values/colors.xml..."
 
-cat > "$PROJECT/app/src/main/res/values/colors.xml" << 'ENDOFFILE'
+cat > "$PROJECT/res/values/colors.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <!--=================================================
     RECURSOS DE COR — colors.xml
@@ -540,7 +540,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[6/8] Criando res/values/strings.xml..."
 
-cat > "$PROJECT/app/src/main/res/values/strings.xml" << 'ENDOFFILE'
+cat > "$PROJECT/res/values/strings.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <!--=================================================
     RECURSOS DE TEXTO — strings.xml
@@ -571,7 +571,7 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[7/8] Criando res/values/themes.xml..."
 
-cat > "$PROJECT/app/src/main/res/values/themes.xml" << 'ENDOFFILE'
+cat > "$PROJECT/res/values/themes.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <!--=================================================
     TEMA DO APP — themes.xml
