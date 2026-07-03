@@ -3,24 +3,36 @@
     RECURSOS DE COR — colors.xml
     Paleta centralizada do aplicativo.
     Altere aqui para mudar as cores em todo o app.
-    Paleta atual: Azul Índigo escuro
+    Paleta atual: Dark Navy moderno
 =================================================-->
 <resources>
 
     <!--── SEÇÃO SUPERIOR (Relógio) ─────────────────-->
-    <color name="section_top">#1A237E</color>
+    <color name="section_top">#0A0F1E</color>
 
-    <!--── SEÇÃO INFERIOR (Status + Menu) ───────────-->
-    <color name="section_bottom">#283593</color>
+    <!--── SEÇÃO INFERIOR (Botões) ──────────────────-->
+    <color name="section_bottom">#111827</color>
+
+    <!--── TOOLBAR ──────────────────────────────────-->
+    <color name="toolbar_bg">#0D1B2A</color>
 
     <!--── MENU LATERAL (Drawer) ────────────────────-->
-    <color name="drawer_bg">#0D1B6B</color>
+    <color name="drawer_bg">#0A0F1E</color>
+    <color name="drawer_item_bg">#1A2540</color>
 
     <!--── TEXTOS ───────────────────────────────────-->
     <color name="text_light">#FFFFFF</color>
     <color name="text_light_dim">#90CAF9</color>
+    <color name="text_date">#7986CB</color>
+    <color name="text_status">#4CAF50</color>
+
+    <!--── BOTÕES ───────────────────────────────────-->
+    <color name="btn_alarme">#E53935</color>
+    <color name="btn_notas">#43A047</color>
+    <color name="btn_musica">#8E24AA</color>
+    <color name="btn_clima">#00ACC1</color>
 
     <!--── DIVISOR ──────────────────────────────────-->
-    <color name="divider">#3949AB</color>
+    <color name="divider">#1E2D45</color>
 
 </resources>

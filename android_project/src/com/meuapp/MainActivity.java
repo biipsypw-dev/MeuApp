@@ -2,23 +2,30 @@ package com.meuapp;
 
 /*=================================================
     IMPORTS
-    Classes nativas Android + widgets de prática
+    Apenas classes nativas Android e Java.
+    Sem AppCompat, sem bibliotecas externas.
 =================================================*/
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.AlarmClock;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,45 +36,59 @@ import java.util.Locale;
  * =================================================
  * ACTIVITY PRINCIPAL — MainActivity.java
  *
- * Agora inclui área de prática no menu lateral com:
- *   - EditText, Button, Switch, CheckBox, SeekBar
+ * Responsabilidades:
+ *   1. Exibir relógio e data em tempo real
+ *   2. Controlar abertura/fechamento do menu lateral
+ *   3. Funcionalidades dos 4 botões:
+ *      - Alarme  → abre TimePicker e define alarme
+ *      - Notas   → abre editor com SharedPreferences
+ *      - Música  → abre player de música do sistema
+ *      - Clima   → abre previsão no navegador
  * =================================================
  */
 public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 1 — DECLARAÇÃO DE VIEWS
+    // BLOCO 1 — DECLARAÇÃO DE VARIÁVEIS
     //─────────────────────────────────────────────
 
-    /* Views da tela principal */
+    /* Views principais */
     private TextView    tvClock;
+    private TextView    tvDate;
+    private TextView    tvNotaSalva;
     private FrameLayout navDrawer;
     private Button      btnMenu;
     private Button      btnCloseDrawer;
 
-    /* Views de prática no menu lateral */
-    private EditText   etName;        // Campo de texto
-    private Button     btnUpdate;     // Botão de ação
-    private Switch     switchOption;  // Interruptor
-    private CheckBox   cbOption;      // Caixa de marcação
-    private SeekBar    seekSize;      // Controle deslizante
-    private TextView   tvResult;      // Painel de resultado
+    /* Botões de ação */
+    private Button btnAlarme;
+    private Button btnNotas;
+    private Button btnMusica;
+    private Button btnClima;
 
-    /* Controle do relógio */
+    /* Relógio */
     private Handler  clockHandler;
     private Runnable clockRunnable;
 
-    /* Constantes */
+    /* Formatos de data/hora */
     private static final SimpleDateFormat TIME_FORMAT =
             new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+    private static final SimpleDateFormat DATE_FORMAT =
+            new SimpleDateFormat("EEE, dd MMM yyyy", new Locale("pt", "BR"));
+
+    /* Constantes de tempo */
     private static final long CLOCK_INTERVAL_MS = 1000L;
-    private static final long ANIM_FADE_IN_MS  = 250L;
-    private static final long ANIM_FADE_OUT_MS = 180L;
+    private static final long ANIM_FADE_IN_MS   = 250L;
+    private static final long ANIM_FADE_OUT_MS  = 180L;
+
+    /* SharedPreferences — salvar notas localmente */
+    private static final String PREFS_NAME  = "meuapp_prefs";
+    private static final String KEY_NOTA    = "ultima_nota";
 
 
     //─────────────────────────────────────────────
-    // BLOCO 2 — onCreate
+    // BLOCO 2 — CICLO DE VIDA: onCreate
     //─────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +98,8 @@ public class MainActivity extends Activity {
         initViews();
         initClock();
         initDrawer();
-        initPracticeWidgets(); // <-- NOVO: liga os widgets de prática
+        initBotoes();
+        carregarNotaSalva();
     }
 
 
@@ -86,14 +108,21 @@ public class MainActivity extends Activity {
     //─────────────────────────────────────────────
     private void initViews() {
         tvClock        = findViewById(R.id.tv_clock);
+        tvDate         = findViewById(R.id.tv_date);
+        tvNotaSalva    = findViewById(R.id.tv_nota_salva);
         navDrawer      = findViewById(R.id.nav_drawer);
         btnMenu        = findViewById(R.id.btn_menu);
         btnCloseDrawer = findViewById(R.id.btn_close_drawer);
+        btnAlarme      = findViewById(R.id.btn_alarme);
+        btnNotas       = findViewById(R.id.btn_notas);
+        btnMusica      = findViewById(R.id.btn_musica);
+        btnClima       = findViewById(R.id.btn_clima);
     }
 
 
     //─────────────────────────────────────────────
-    // BLOCO 4 — RELÓGIO
+    // BLOCO 4 — RELÓGIO + DATA EM TEMPO REAL
+    // Atualiza hora e data a cada segundo
     //─────────────────────────────────────────────
     private void initClock() {
         clockHandler = new Handler(Looper.getMainLooper());
@@ -101,8 +130,9 @@ public class MainActivity extends Activity {
         clockRunnable = new Runnable() {
             @Override
             public void run() {
-                String horaAtual = TIME_FORMAT.format(new Date());
-                tvClock.setText(horaAtual);
+                Date agora = new Date();
+                tvClock.setText(TIME_FORMAT.format(agora));
+                tvDate.setText(DATE_FORMAT.format(agora));
                 clockHandler.postDelayed(this, CLOCK_INTERVAL_MS);
             }
         };
@@ -110,28 +140,23 @@ public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 5 — MENU LATERAL (ABRIR/FECHAR)
+    // BLOCO 5 — MENU LATERAL (DRAWER)
     //─────────────────────────────────────────────
     private void initDrawer() {
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                openDrawer();
-            }
+            public void onClick(View v) { openDrawer(); }
         });
 
         btnCloseDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                closeDrawer();
-            }
+            public void onClick(View v) { closeDrawer(); }
         });
     }
 
     private void openDrawer() {
         navDrawer.clearAnimation();
         navDrawer.setVisibility(View.VISIBLE);
-
         AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
         fadeIn.setDuration(ANIM_FADE_IN_MS);
         fadeIn.setFillAfter(true);
@@ -141,15 +166,12 @@ public class MainActivity extends Activity {
     private void closeDrawer() {
         navDrawer.clearAnimation();
         final boolean[] cancelled = {false};
-
         AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
         fadeOut.setDuration(ANIM_FADE_OUT_MS);
         fadeOut.setFillAfter(true);
-
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation a)  { }
-            @Override public void onAnimationRepeat(Animation a) { }
-
+            @Override public void onAnimationStart(Animation a)  {}
+            @Override public void onAnimationRepeat(Animation a) {}
             @Override
             public void onAnimationEnd(Animation a) {
                 if (!cancelled[0] && navDrawer.getVisibility() == View.VISIBLE) {
@@ -157,100 +179,243 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
         navDrawer.startAnimation(fadeOut);
     }
 
 
     //─────────────────────────────────────────────
-    // BLOCO 6 — WIDGETS DE PRÁTICA
-    // Aqui você aprende a capturar eventos de cada objeto
+    // BLOCO 6 — BOTÕES DE AÇÃO
+    // Cada botão tem uma função real
     //─────────────────────────────────────────────
-    private void initPracticeWidgets() {
+    private void initBotoes() {
 
-        //── 1. Conecta as views do Java ao XML ─────
-        etName       = findViewById(R.id.et_name);
-        btnUpdate    = findViewById(R.id.btn_update);
-        switchOption = findViewById(R.id.switch_option);
-        cbOption     = findViewById(R.id.cb_option);
-        seekSize     = findViewById(R.id.seek_size);
-        tvResult     = findViewById(R.id.tv_result);
-
-        //── 2. Botão "Atualizar" ────────────────────
-        // Quando clicado, lê o EditText e atualiza o resultado
-        btnUpdate.setOnClickListener(new View.OnClickListener() {
+        /*── ALARME ─────────────────────────────────
+         * Abre um TimePicker para o usuário escolher
+         * a hora, depois tenta criar o alarme via
+         * Intent padrão do sistema.
+         ────────────────────────────────────────────*/
+        btnAlarme.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateResult();
+                abrirAlarme();
             }
         });
 
-        //── 3. Switch (interruptor) ─────────────────
-        // Quando mudar de ligado para desligado, atualiza resultado
-        switchOption.setOnCheckedChangeListener(
-            new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    updateResult();
-                }
-            }
-        );
-
-        //── 4. CheckBox ─────────────────────────────
-        // Quando marcar/desmarcar, atualiza resultado
-        cbOption.setOnCheckedChangeListener(
-            new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    updateResult();
-                }
-            }
-        );
-
-        //── 5. SeekBar (controle deslizante) ────────
-        // Quando arrastar, muda o tamanho do texto do resultado
-        seekSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        /*── NOTAS ───────────────────────────────────
+         * Abre um AlertDialog com EditText.
+         * A nota é salva em SharedPreferences e
+         * exibida no menu lateral.
+         ────────────────────────────────────────────*/
+        btnNotas.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                // Mínimo 12sp para não ficar muito pequeno
-                float newSize = 12 + progress;
-                tvResult.setTextSize(newSize);
-                updateResult();
+            public void onClick(View v) {
+                abrirNotas();
             }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
-            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
-        // Atualiza resultado inicial
-        updateResult();
-    }
+        /*── MÚSICA ──────────────────────────────────
+         * Abre o player de música padrão do sistema
+         * via Intent com categoria APP_MUSIC.
+         ────────────────────────────────────────────*/
+        btnMusica.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirMusica();
+            }
+        });
 
-    /**
-     * Lê o estado de todos os widgets e monta uma mensagem.
-     * Esse método é chamado toda vez que algum widget muda.
-     */
-    private void updateResult() {
-        String nome = etName.getText().toString().trim();
-        if (nome.isEmpty()) {
-            nome = "Visitante";
-        }
-
-        boolean noturno = switchOption.isChecked();
-        boolean lembrar = cbOption.isChecked();
-        int tamanho     = seekSize.getProgress() + 12;
-
-        String texto = "Olá, " + nome + "!\n" +
-                "Modo noturno: " + (noturno ? "ligado" : "desligado") + "\n" +
-                "Lembrar: " + (lembrar ? "sim" : "não") + "\n" +
-                "Texto: " + tamanho + "sp";
-
-        tvResult.setText(texto);
+        /*── CLIMA ───────────────────────────────────
+         * Abre a previsão do tempo no navegador
+         * usando a URL do Google Clima.
+         ────────────────────────────────────────────*/
+        btnClima.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirClima();
+            }
+        });
     }
 
 
     //─────────────────────────────────────────────
-    // BLOCO 7 — BOTÃO VOLTAR
+    // BLOCO 7 — IMPLEMENTAÇÃO DO ALARME
+    //─────────────────────────────────────────────
+
+    /**
+     * Abre um TimePickerDialog (relógio visual para
+     * escolher hora e minuto), depois dispara o
+     * alarme via Intent ACTION_SET_ALARM.
+     *
+     * O Android abre automaticamente o app de relógio
+     * do sistema com o horário já preenchido.
+     */
+    private void abrirAlarme() {
+        // Pega hora atual para pré-preencher o picker
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int horaAtual   = cal.get(java.util.Calendar.HOUR_OF_DAY);
+        int minutoAtual = cal.get(java.util.Calendar.MINUTE);
+
+        // Abre o seletor de hora (formato 24h)
+        TimePickerDialog picker = new TimePickerDialog(
+            this,
+            new TimePickerDialog.OnTimeSetListener() {
+                @Override
+                public void onTimeSet(TimePicker view, int hora, int minuto) {
+
+                    // Tenta abrir o app de alarme do sistema
+                    try {
+                        Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM);
+                        intent.putExtra(AlarmClock.EXTRA_HOUR, hora);
+                        intent.putExtra(AlarmClock.EXTRA_MINUTES, minuto);
+                        intent.putExtra(AlarmClock.EXTRA_MESSAGE, "MeuApp");
+                        intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        // Fallback: mostra confirmação em toast
+                        String msg = String.format(
+                            Locale.getDefault(),
+                            "Alarme definido para %02d:%02d", hora, minuto
+                        );
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                    }
+                }
+            },
+            horaAtual,
+            minutoAtual,
+            true // formato 24h
+        );
+
+        picker.setTitle("Definir alarme");
+        picker.show();
+    }
+
+
+    //─────────────────────────────────────────────
+    // BLOCO 8 — IMPLEMENTAÇÃO DAS NOTAS
+    //─────────────────────────────────────────────
+
+    /**
+     * Abre um AlertDialog com EditText.
+     * Carrega a nota salva anteriormente (se existir).
+     * Ao salvar, grava em SharedPreferences e
+     * atualiza o TextView no menu lateral.
+     */
+    private void abrirNotas() {
+        // Cria o campo de texto para digitar a nota
+        final EditText editNota = new EditText(this);
+        editNota.setHint(getString(R.string.notas_hint));
+        editNota.setMinLines(4);
+        editNota.setMaxLines(8);
+        editNota.setGravity(android.view.Gravity.TOP);
+        editNota.setPadding(32, 24, 32, 24);
+
+        // Carrega nota salva anteriormente
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String notaExistente = prefs.getString(KEY_NOTA, "");
+        if (!notaExistente.isEmpty()) {
+            editNota.setText(notaExistente);
+            editNota.setSelection(notaExistente.length()); // cursor no final
+        }
+
+        // Monta o diálogo
+        new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.notas_titulo))
+            .setView(editNota)
+            .setPositiveButton(getString(R.string.notas_salvar), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String nota = editNota.getText().toString().trim();
+                    salvarNota(nota);
+                }
+            })
+            .setNeutralButton(getString(R.string.notas_limpar), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    salvarNota("");
+                }
+            })
+            .setNegativeButton(getString(R.string.notas_cancelar), null)
+            .show();
+    }
+
+    /** Salva a nota em SharedPreferences e atualiza a UI */
+    private void salvarNota(String nota) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(KEY_NOTA, nota).apply();
+
+        // Atualiza o TextView no menu lateral
+        if (tvNotaSalva != null) {
+            tvNotaSalva.setText(nota.isEmpty() ? "Nenhuma nota ainda." : nota);
+        }
+
+        Toast.makeText(this, getString(R.string.notas_salvo), Toast.LENGTH_SHORT).show();
+    }
+
+    /** Carrega a nota salva ao abrir o app */
+    private void carregarNotaSalva() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String nota = prefs.getString(KEY_NOTA, "");
+        if (tvNotaSalva != null && !nota.isEmpty()) {
+            tvNotaSalva.setText(nota);
+        }
+    }
+
+
+    //─────────────────────────────────────────────
+    // BLOCO 9 — IMPLEMENTAÇÃO DE MÚSICA
+    //─────────────────────────────────────────────
+
+    /**
+     * Tenta abrir o player de música do sistema.
+     * Usa a categoria APP_MUSIC do Intent.
+     * Se não encontrar nenhum app de música,
+     * mostra um Toast informando.
+     */
+    private void abrirMusica() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_APP_MUSIC);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            // Fallback: abre gerenciador de arquivos de áudio
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setType("audio/*");
+                startActivity(intent);
+            } catch (Exception e2) {
+                Toast.makeText(this,
+                    "Nenhum player de música encontrado.",
+                    Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+    //─────────────────────────────────────────────
+    // BLOCO 10 — IMPLEMENTAÇÃO DO CLIMA
+    //─────────────────────────────────────────────
+
+    /**
+     * Abre a previsão do tempo no navegador.
+     * Usa o Google Clima (weather.com via busca).
+     * Se não houver navegador, mostra Toast.
+     */
+    private void abrirClima() {
+        try {
+            Uri uri = Uri.parse("https://www.google.com/search?q=previsao+do+tempo");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this,
+                "Nenhum navegador encontrado.",
+                Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    //─────────────────────────────────────────────
+    // BLOCO 11 — BOTÃO VOLTAR
     //─────────────────────────────────────────────
     @Override
     public void onBackPressed() {
@@ -263,7 +428,7 @@ public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 8 — CICLO DE VIDA
+    // BLOCO 12 — CICLO DE VIDA: onResume / onPause / onDestroy
     //─────────────────────────────────────────────
     @Override
     protected void onResume() {
