@@ -6,7 +6,7 @@
 #=================================================
 
 # Nome da pasta raiz do projeto (altere se quiser)
-PROJECT="MeuApp"
+PROJECT="meuapp"
 
 echo ""
 echo "========================================"
@@ -18,7 +18,7 @@ echo "========================================"
 #─────────────────────────────────────────────
 echo "[1/8] Criando estrutura de diretórios..."
 
-mkdir -p "$PROJECT/src/com/MeuApp"
+mkdir -p "$PROJECT/src/com/meuapp"
 mkdir -p "$PROJECT/res/layout"
 mkdir -p "$PROJECT/res/values"
 
@@ -32,7 +32,7 @@ echo "[2/8] Criando AndroidManifest.xml..."
 cat > "$PROJECT/AndroidManifest.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.MeuApp">
+    package="com.meuapp">
 
     <application
         android:allowBackup="true"
@@ -250,8 +250,8 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[4/8] Criando java/com/example/MainActivity.java..."
 
-cat > "$PROJECT/src/com/MeuApp/MainActivity.java" << 'ENDOFFILE'
-package com.MeuApp;
+cat > "$PROJECT/src/com/meuapp/MainActivity.java" << 'ENDOFFILE'
+package com.meuapp;
 
 /*=================================================
     IMPORTS

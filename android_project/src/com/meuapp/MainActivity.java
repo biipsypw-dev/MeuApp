@@ -1,4 +1,4 @@
-package com.MeuApp;
+package com.meuapp;
 
 /*=================================================
     IMPORTS
