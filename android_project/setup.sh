@@ -32,10 +32,13 @@ echo "[2/8] Criando AndroidManifest.xml..."
 cat > "$PROJECT/AndroidManifest.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.meuapp">
+    package="com.meuapp"
+    android:versionCode="1"
+    android:versionName="1.0">
 
-    <!-- Versões SDK compatíveis -->
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="34" />
 
     <application
         android:allowBackup="true"
