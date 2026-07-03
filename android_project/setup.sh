@@ -31,11 +31,6 @@ echo "[2/8] Criando AndroidManifest.xml..."
 
 cat > "$PROJECT/app/src/main/AndroidManifest.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    MANIFESTO DO APLICATIVO
-    Define permissões e componentes do app
-    Não requer permissões especiais
-=================================================-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example">
 
@@ -45,16 +40,12 @@ cat > "$PROJECT/app/src/main/AndroidManifest.xml" << 'ENDOFFILE'
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
 
-        <!--── ACTIVITY PRINCIPAL ──────────────────────
-            exported="true" obrigatório para Android 12+
-            windowSoftInputMode evita teclado subindo a tela
-        ─────────────────────────────────────────────-->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden">
 
-            <!-- Define como ponto de entrada do launcher -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
