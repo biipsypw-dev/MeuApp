@@ -2,8 +2,7 @@ package com.meuapp;
 
 /*=================================================
     IMPORTS
-    Apenas classes nativas Android e Java
-    Sem AppCompat, sem bibliotecas externas
+    Classes nativas Android + widgets de prática
 =================================================*/
 import android.app.Activity;
 import android.os.Bundle;
@@ -13,7 +12,12 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -25,64 +29,60 @@ import java.util.Locale;
  * =================================================
  * ACTIVITY PRINCIPAL — MainActivity.java
  *
- * Responsabilidades:
- *   1. Exibir relógio em tempo real (seção superior)
- *   2. Controlar abertura/fechamento do menu lateral
- *   3. Interceptar botão Voltar para fechar o menu
+ * Agora inclui área de prática no menu lateral com:
+ *   - EditText, Button, Switch, CheckBox, SeekBar
  * =================================================
  */
 public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 1 — DECLARAÇÃO DE VARIÁVEIS
-    // Componentes da interface e controles internos
+    // BLOCO 1 — DECLARAÇÃO DE VIEWS
     //─────────────────────────────────────────────
 
-    /* Views do layout */
-    private TextView    tvClock;         // Exibe a hora atual (seção superior)
-    private FrameLayout navDrawer;       // Painel do menu lateral (camada 2)
-    private Button      btnMenu;         // Abre o menu (seção inferior, canto sup. esq.)
-    private Button      btnCloseDrawer;  // Fecha o menu (dentro do drawer)
+    /* Views da tela principal */
+    private TextView    tvClock;
+    private FrameLayout navDrawer;
+    private Button      btnMenu;
+    private Button      btnCloseDrawer;
+
+    /* Views de prática no menu lateral */
+    private EditText   etName;        // Campo de texto
+    private Button     btnUpdate;     // Botão de ação
+    private Switch     switchOption;  // Interruptor
+    private CheckBox   cbOption;      // Caixa de marcação
+    private SeekBar    seekSize;      // Controle deslizante
+    private TextView   tvResult;      // Painel de resultado
 
     /* Controle do relógio */
-    private Handler  clockHandler;   // Agenda tarefas na UI thread
-    private Runnable clockRunnable;  // Tarefa que atualiza o relógio a cada segundo
+    private Handler  clockHandler;
+    private Runnable clockRunnable;
 
     /* Constantes */
-    // Formato de hora: 24h com segundos → "14:35:07"
     private static final SimpleDateFormat TIME_FORMAT =
             new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-
-    // Intervalo entre atualizações do relógio (1 segundo)
     private static final long CLOCK_INTERVAL_MS = 1000L;
-
-    // Duração das animações de fade do menu (milissegundos)
     private static final long ANIM_FADE_IN_MS  = 250L;
     private static final long ANIM_FADE_OUT_MS = 180L;
 
 
     //─────────────────────────────────────────────
-    // BLOCO 2 — CICLO DE VIDA: onCreate
-    // Ponto de entrada: infla o layout e inicializa tudo
+    // BLOCO 2 — onCreate
     //─────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Infla o layout definido em res/layout/activity_main.xml
         setContentView(R.layout.activity_main);
 
-        // Inicialização em ordem: Views → Relógio → Drawer
         initViews();
         initClock();
         initDrawer();
+        initPracticeWidgets(); // <-- NOVO: liga os widgets de prática
     }
 
 
     //─────────────────────────────────────────────
     // BLOCO 3 — INICIALIZAÇÃO DE VIEWS
-    // Conecta variáveis Java aos elementos do XML
     //─────────────────────────────────────────────
     private void initViews() {
         tvClock        = findViewById(R.id.tv_clock);
@@ -93,42 +93,26 @@ public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 4 — RELÓGIO EM TEMPO REAL
-    // Handler + Runnable que atualiza o TextView
-    // a cada segundo enquanto o app está em foco.
-    //
-    // Fluxo:
-    //   onResume() → clockHandler.post() → inicia
-    //   onPause()  → removeCallbacks()   → para
+    // BLOCO 4 — RELÓGIO
     //─────────────────────────────────────────────
     private void initClock() {
-        // Handler vinculado à thread principal (UI thread)
-        // Uso de Looper.getMainLooper() evita warning em API 30+
         clockHandler = new Handler(Looper.getMainLooper());
 
         clockRunnable = new Runnable() {
             @Override
             public void run() {
-                // Lê a hora atual do sistema e aplica o formato HH:mm:ss
                 String horaAtual = TIME_FORMAT.format(new Date());
                 tvClock.setText(horaAtual);
-
-                // Reagenda a si mesmo para daqui a 1 segundo
                 clockHandler.postDelayed(this, CLOCK_INTERVAL_MS);
             }
         };
-        // Nota: a execução inicia em onResume(), não aqui,
-        // para evitar duplo início no fluxo onCreate → onResume
     }
 
 
     //─────────────────────────────────────────────
-    // BLOCO 5 — MENU LATERAL (DRAWER)
-    // Configura os listeners dos botões abrir/fechar
+    // BLOCO 5 — MENU LATERAL (ABRIR/FECHAR)
     //─────────────────────────────────────────────
     private void initDrawer() {
-
-        // Botão ☰ — abre o menu (seção inferior, canto sup. esq.)
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +120,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        // Botão ✕ — fecha o menu (dentro do próprio drawer)
         btnCloseDrawer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,46 +128,30 @@ public class MainActivity extends Activity {
         });
     }
 
-    /**
-     * Abre o menu lateral com animação de fade-in.
-     * Cancela qualquer animação em andamento antes de iniciar
-     * para evitar conflito entre fade-out e fade-in simultâneos.
-     */
     private void openDrawer() {
-        // Cancela animação anterior (ex: fade-out interrompido)
         navDrawer.clearAnimation();
         navDrawer.setVisibility(View.VISIBLE);
 
-        // Fade: transparente → opaco
         AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
         fadeIn.setDuration(ANIM_FADE_IN_MS);
         fadeIn.setFillAfter(true);
         navDrawer.startAnimation(fadeIn);
     }
 
-    /**
-     * Fecha o menu lateral com animação de fade-out.
-     * O GONE é aplicado somente ao fim da animação (via listener).
-     * Flag local evita que listener stale aplique GONE após reabertura.
-     */
     private void closeDrawer() {
         navDrawer.clearAnimation();
-
-        // Flag local: detecta se esta animação foi substituída antes de terminar
         final boolean[] cancelled = {false};
 
-        // Fade: opaco → transparente
         AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
         fadeOut.setDuration(ANIM_FADE_OUT_MS);
         fadeOut.setFillAfter(true);
 
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation a)  { /* não usado */ }
-            @Override public void onAnimationRepeat(Animation a) { /* não usado */ }
+            @Override public void onAnimationStart(Animation a)  { }
+            @Override public void onAnimationRepeat(Animation a) { }
 
             @Override
             public void onAnimationEnd(Animation a) {
-                // Aplica GONE apenas se o drawer não foi reaberto
                 if (!cancelled[0] && navDrawer.getVisibility() == View.VISIBLE) {
                     navDrawer.setVisibility(View.GONE);
                 }
@@ -196,45 +163,120 @@ public class MainActivity extends Activity {
 
 
     //─────────────────────────────────────────────
-    // BLOCO 6 — BOTÃO VOLTAR (BACK)
-    // Se o menu estiver aberto, fecha-o em vez de sair do app
+    // BLOCO 6 — WIDGETS DE PRÁTICA
+    // Aqui você aprende a capturar eventos de cada objeto
+    //─────────────────────────────────────────────
+    private void initPracticeWidgets() {
+
+        //── 1. Conecta as views do Java ao XML ─────
+        etName       = findViewById(R.id.et_name);
+        btnUpdate    = findViewById(R.id.btn_update);
+        switchOption = findViewById(R.id.switch_option);
+        cbOption     = findViewById(R.id.cb_option);
+        seekSize     = findViewById(R.id.seek_size);
+        tvResult     = findViewById(R.id.tv_result);
+
+        //── 2. Botão "Atualizar" ────────────────────
+        // Quando clicado, lê o EditText e atualiza o resultado
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateResult();
+            }
+        });
+
+        //── 3. Switch (interruptor) ─────────────────
+        // Quando mudar de ligado para desligado, atualiza resultado
+        switchOption.setOnCheckedChangeListener(
+            new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    updateResult();
+                }
+            }
+        );
+
+        //── 4. CheckBox ─────────────────────────────
+        // Quando marcar/desmarcar, atualiza resultado
+        cbOption.setOnCheckedChangeListener(
+            new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    updateResult();
+                }
+            }
+        );
+
+        //── 5. SeekBar (controle deslizante) ────────
+        // Quando arrastar, muda o tamanho do texto do resultado
+        seekSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // Mínimo 12sp para não ficar muito pequeno
+                float newSize = 12 + progress;
+                tvResult.setTextSize(newSize);
+                updateResult();
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        // Atualiza resultado inicial
+        updateResult();
+    }
+
+    /**
+     * Lê o estado de todos os widgets e monta uma mensagem.
+     * Esse método é chamado toda vez que algum widget muda.
+     */
+    private void updateResult() {
+        String nome = etName.getText().toString().trim();
+        if (nome.isEmpty()) {
+            nome = "Visitante";
+        }
+
+        boolean noturno = switchOption.isChecked();
+        boolean lembrar = cbOption.isChecked();
+        int tamanho     = seekSize.getProgress() + 12;
+
+        String texto = "Olá, " + nome + "!\n" +
+                "Modo noturno: " + (noturno ? "ligado" : "desligado") + "\n" +
+                "Lembrar: " + (lembrar ? "sim" : "não") + "\n" +
+                "Texto: " + tamanho + "sp";
+
+        tvResult.setText(texto);
+    }
+
+
+    //─────────────────────────────────────────────
+    // BLOCO 7 — BOTÃO VOLTAR
     //─────────────────────────────────────────────
     @Override
     public void onBackPressed() {
         if (navDrawer.getVisibility() == View.VISIBLE) {
-            // Menu aberto → fecha o menu, não sai do app
             closeDrawer();
         } else {
-            // Menu fechado → comportamento padrão
             super.onBackPressed();
         }
     }
 
 
     //─────────────────────────────────────────────
-    // BLOCO 7 — CICLO DE VIDA: onResume / onPause
-    // Gerencia o relógio conforme visibilidade do app
+    // BLOCO 8 — CICLO DE VIDA
     //─────────────────────────────────────────────
-
     @Override
     protected void onResume() {
         super.onResume();
-        // App voltou ao foco → inicia (ou reinicia) o relógio
         clockHandler.post(clockRunnable);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // App saiu do foco → para o relógio para economizar recursos
         clockHandler.removeCallbacks(clockRunnable);
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 8 — CICLO DE VIDA: onDestroy
-    // Limpeza final: remove todos os callbacks pendentes
-    //─────────────────────────────────────────────
     @Override
     protected void onDestroy() {
         super.onDestroy();

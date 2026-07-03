@@ -3,9 +3,9 @@
 # SETUP.SH — Gerador automático do projeto Android
 # Execute no Termux: bash setup.sh
 # Cria toda a estrutura de pastas e arquivos.
+# Versão com widgets de prática no menu lateral.
 #=================================================
 
-# Nome da pasta raiz do projeto (altere se quiser)
 PROJECT="meuapp"
 
 echo ""
@@ -73,35 +73,16 @@ echo "[3/8] Criando res/layout/activity_main.xml..."
 
 cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    LAYOUT PRINCIPAL — activity_main.xml
-    Estrutura em duas camadas (FrameLayout raiz):
-      Camada 1: Conteúdo principal (seção superior + inferior)
-      Camada 2: Menu lateral sobreposto (tela toda, oculto por padrão)
-    Sem dependências externas — apenas Views nativas Android
-=================================================-->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <!--═══════════════════════════════════════════
-        CAMADA 1 — CONTEÚDO PRINCIPAL
-        LinearLayout vertical divide a tela em dois:
-          • Seção Superior (50%): relógio
-          • Seção Inferior (50%): status + botão menu
-    ═══════════════════════════════════════════-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
-        <!--── SEÇÃO SUPERIOR: RELÓGIO ──────────────
-            Ocupa 50% da altura via layout_weight=1
-            Conteúdo centralizado com gravity center
-        ─────────────────────────────────────────-->
         <FrameLayout
             android:id="@+id/section_top"
             android:layout_width="match_parent"
@@ -109,7 +90,6 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
             android:layout_weight="1"
             android:background="@color/section_top">
 
-            <!-- Texto do relógio — atualizado em MainActivity.java -->
             <TextView
                 android:id="@+id/tv_clock"
                 android:layout_width="wrap_content"
@@ -123,12 +103,6 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
 
         </FrameLayout>
 
-
-        <!--── SEÇÃO INFERIOR: STATUS + BOTÃO MENU ──
-            Ocupa 50% da altura via layout_weight=1
-            Botão de menu no canto superior esquerdo
-            Mensagem de status centralizada
-        ─────────────────────────────────────────-->
         <FrameLayout
             android:id="@+id/section_bottom"
             android:layout_width="match_parent"
@@ -136,11 +110,6 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
             android:layout_weight="1"
             android:background="@color/section_bottom">
 
-            <!--── Botão Abrir Menu ──────────────────
-                Posicionado: topo + esquerda da seção
-                Caractere ☰ (trigram) como ícone nativo
-                Não requer drawable externo
-            ─────────────────────────────────────-->
             <Button
                 android:id="@+id/btn_menu"
                 android:layout_width="56dp"
@@ -154,9 +123,6 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
                 android:contentDescription="@string/menu_desc"
                 android:padding="0dp" />
 
-            <!--── Mensagem de Status ────────────────
-                Centralizada na seção inferior
-            ─────────────────────────────────────-->
             <TextView
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
@@ -169,16 +135,7 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
         </FrameLayout>
 
     </LinearLayout>
-    <!--══ FIM CAMADA 1 ═════════════════════════-->
 
-
-    <!--═══════════════════════════════════════════
-        CAMADA 2 — MENU LATERAL (TELA TODA)
-        Sobrepõe o conteúdo principal (FrameLayout)
-        Padrão: visibility="gone" (invisível)
-        Ativado por: btn_menu em MainActivity.java
-        Fechado por: btn_close_drawer ou botão Voltar
-    ═══════════════════════════════════════════-->
     <FrameLayout
         android:id="@+id/nav_drawer"
         android:layout_width="match_parent"
@@ -186,10 +143,6 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
         android:background="@color/drawer_bg"
         android:visibility="gone">
 
-        <!--── Botão Fechar Menu ─────────────────────
-            Mesmo posicionamento do btn_menu
-            Caractere ✕ como ícone nativo
-        ─────────────────────────────────────────-->
         <Button
             android:id="@+id/btn_close_drawer"
             android:layout_width="56dp"
@@ -203,48 +156,105 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
             android:contentDescription="@string/close_menu_desc"
             android:padding="0dp" />
 
-        <!--── Conteúdo Central do Menu ─────────────
-            Título + mensagem de status
-            Centralizado vertical e horizontalmente
-        ─────────────────────────────────────────-->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginHorizontal="24dp">
 
-            <!-- Título do menu -->
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/drawer_title"
-                android:textSize="32sp"
-                android:textColor="@color/text_light"
-                android:textStyle="bold"
-                android:letterSpacing="0.08" />
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
 
-            <!-- Separador visual -->
-            <View
-                android:layout_width="120dp"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:background="@color/divider" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drawer_title"
+                    android:textSize="32sp"
+                    android:textColor="@color/text_light"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp" />
 
-            <!-- Mensagem de status do menu -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/drawer_status"
-                android:textSize="18sp"
-                android:textColor="@color/text_light_dim" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Seu nome:"
+                    android:textColor="@color/text_light_dim"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
 
-        </LinearLayout>
+                <EditText
+                    android:id="@+id/et_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Digite aqui"
+                    android:textColor="@color/text_light"
+                    android:textColorHint="@color/text_light_dim"
+                    android:background="@android:drawable/edit_text"
+                    android:padding="12dp" />
+
+                <Button
+                    android:id="@+id/btn_update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Atualizar"
+                    android:textColor="@color/text_light"
+                    android:background="@color/section_bottom" />
+
+                <Switch
+                    android:id="@+id/switch_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Modo noturno"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Lembrar preferências"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Tamanho do texto:"
+                    android:textColor="@color/text_light_dim"
+                    android:textSize="14sp" />
+
+                <SeekBar
+                    android:id="@+id/seek_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:max="50"
+                    android:progress="22" />
+
+                <TextView
+                    android:id="@+id/tv_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:background="@color/section_top"
+                    android:padding="16dp"
+                    android:text="Resultado aparece aqui"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </FrameLayout>
-    <!--══ FIM CAMADA 2 ═════════════════════════-->
-
 
 </FrameLayout>
 ENDOFFILE
@@ -254,16 +264,11 @@ echo "      OK"
 #─────────────────────────────────────────────
 # BLOCO 4 — MainActivity.java
 #─────────────────────────────────────────────
-echo "[4/8] Criando java/com/example/MainActivity.java..."
+echo "[4/8] Criando src/com/meuapp/MainActivity.java..."
 
 cat > "$PROJECT/src/com/meuapp/MainActivity.java" << 'ENDOFFILE'
 package com.meuapp;
 
-/*=================================================
-    IMPORTS
-    Apenas classes nativas Android e Java
-    Sem AppCompat, sem bibliotecas externas
-=================================================*/
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -272,77 +277,52 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-
-/**
- * =================================================
- * ACTIVITY PRINCIPAL — MainActivity.java
- *
- * Responsabilidades:
- *   1. Exibir relógio em tempo real (seção superior)
- *   2. Controlar abertura/fechamento do menu lateral
- *   3. Interceptar botão Voltar para fechar o menu
- * =================================================
- */
 public class MainActivity extends Activity {
 
+    private TextView    tvClock;
+    private FrameLayout navDrawer;
+    private Button      btnMenu;
+    private Button      btnCloseDrawer;
 
-    //─────────────────────────────────────────────
-    // BLOCO 1 — DECLARAÇÃO DE VARIÁVEIS
-    // Componentes da interface e controles internos
-    //─────────────────────────────────────────────
+    private EditText   etName;
+    private Button     btnUpdate;
+    private Switch     switchOption;
+    private CheckBox   cbOption;
+    private SeekBar    seekSize;
+    private TextView   tvResult;
 
-    /* Views do layout */
-    private TextView    tvClock;         // Exibe a hora atual (seção superior)
-    private FrameLayout navDrawer;       // Painel do menu lateral (camada 2)
-    private Button      btnMenu;         // Abre o menu (seção inferior, canto sup. esq.)
-    private Button      btnCloseDrawer;  // Fecha o menu (dentro do drawer)
+    private Handler  clockHandler;
+    private Runnable clockRunnable;
 
-    /* Controle do relógio */
-    private Handler  clockHandler;   // Agenda tarefas na UI thread
-    private Runnable clockRunnable;  // Tarefa que atualiza o relógio a cada segundo
-
-    /* Constantes */
-    // Formato de hora: 24h com segundos → "14:35:07"
     private static final SimpleDateFormat TIME_FORMAT =
             new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-
-    // Intervalo entre atualizações do relógio (1 segundo)
     private static final long CLOCK_INTERVAL_MS = 1000L;
-
-    // Duração das animações de fade do menu (milissegundos)
     private static final long ANIM_FADE_IN_MS  = 250L;
     private static final long ANIM_FADE_OUT_MS = 180L;
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 2 — CICLO DE VIDA: onCreate
-    // Ponto de entrada: infla o layout e inicializa tudo
-    //─────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Infla o layout definido em res/layout/activity_main.xml
         setContentView(R.layout.activity_main);
 
-        // Inicialização em ordem: Views → Relógio → Drawer
         initViews();
         initClock();
         initDrawer();
+        initPracticeWidgets();
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 3 — INICIALIZAÇÃO DE VIEWS
-    // Conecta variáveis Java aos elementos do XML
-    //─────────────────────────────────────────────
     private void initViews() {
         tvClock        = findViewById(R.id.tv_clock);
         navDrawer      = findViewById(R.id.nav_drawer);
@@ -350,156 +330,118 @@ public class MainActivity extends Activity {
         btnCloseDrawer = findViewById(R.id.btn_close_drawer);
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 4 — RELÓGIO EM TEMPO REAL
-    // Handler + Runnable que atualiza o TextView
-    // a cada segundo enquanto o app está em foco.
-    //
-    // Fluxo:
-    //   onResume() → clockHandler.post() → inicia
-    //   onPause()  → removeCallbacks()   → para
-    //─────────────────────────────────────────────
     private void initClock() {
-        // Handler vinculado à thread principal (UI thread)
-        // Uso de Looper.getMainLooper() evita warning em API 30+
         clockHandler = new Handler(Looper.getMainLooper());
-
         clockRunnable = new Runnable() {
             @Override
             public void run() {
-                // Lê a hora atual do sistema e aplica o formato HH:mm:ss
-                String horaAtual = TIME_FORMAT.format(new Date());
-                tvClock.setText(horaAtual);
-
-                // Reagenda a si mesmo para daqui a 1 segundo
+                tvClock.setText(TIME_FORMAT.format(new Date()));
                 clockHandler.postDelayed(this, CLOCK_INTERVAL_MS);
             }
         };
-        // Nota: a execução inicia em onResume(), não aqui,
-        // para evitar duplo início no fluxo onCreate → onResume
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 5 — MENU LATERAL (DRAWER)
-    // Configura os listeners dos botões abrir/fechar
-    //─────────────────────────────────────────────
     private void initDrawer() {
-
-        // Botão ☰ — abre o menu (seção inferior, canto sup. esq.)
-        btnMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openDrawer();
-            }
-        });
-
-        // Botão ✕ — fecha o menu (dentro do próprio drawer)
-        btnCloseDrawer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeDrawer();
-            }
-        });
+        btnMenu.setOnClickListener(v -> openDrawer());
+        btnCloseDrawer.setOnClickListener(v -> closeDrawer());
     }
 
-    /**
-     * Abre o menu lateral com animação de fade-in.
-     * Cancela qualquer animação em andamento antes de iniciar
-     * para evitar conflito entre fade-out e fade-in simultâneos.
-     */
     private void openDrawer() {
-        // Cancela animação anterior (ex: fade-out interrompido)
         navDrawer.clearAnimation();
         navDrawer.setVisibility(View.VISIBLE);
-
-        // Fade: transparente → opaco
         AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
         fadeIn.setDuration(ANIM_FADE_IN_MS);
         fadeIn.setFillAfter(true);
         navDrawer.startAnimation(fadeIn);
     }
 
-    /**
-     * Fecha o menu lateral com animação de fade-out.
-     * O GONE é aplicado somente ao fim da animação (via listener).
-     * Flag local evita que listener stale aplique GONE após reabertura.
-     */
     private void closeDrawer() {
         navDrawer.clearAnimation();
-
-        // Flag local: detecta se esta animação foi substituída antes de terminar
         final boolean[] cancelled = {false};
-
-        // Fade: opaco → transparente
         AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
         fadeOut.setDuration(ANIM_FADE_OUT_MS);
         fadeOut.setFillAfter(true);
-
         fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation a)  { /* não usado */ }
-            @Override public void onAnimationRepeat(Animation a) { /* não usado */ }
-
+            @Override public void onAnimationStart(Animation a)  { }
+            @Override public void onAnimationRepeat(Animation a) { }
             @Override
             public void onAnimationEnd(Animation a) {
-                // Aplica GONE apenas se o drawer não foi reaberto
                 if (!cancelled[0] && navDrawer.getVisibility() == View.VISIBLE) {
                     navDrawer.setVisibility(View.GONE);
                 }
             }
         });
-
         navDrawer.startAnimation(fadeOut);
     }
 
+    private void initPracticeWidgets() {
+        etName       = findViewById(R.id.et_name);
+        btnUpdate    = findViewById(R.id.btn_update);
+        switchOption = findViewById(R.id.switch_option);
+        cbOption     = findViewById(R.id.cb_option);
+        seekSize     = findViewById(R.id.seek_size);
+        tvResult     = findViewById(R.id.tv_result);
 
-    //─────────────────────────────────────────────
-    // BLOCO 6 — BOTÃO VOLTAR (BACK)
-    // Se o menu estiver aberto, fecha-o em vez de sair do app
-    //─────────────────────────────────────────────
+        btnUpdate.setOnClickListener(v -> updateResult());
+
+        switchOption.setOnCheckedChangeListener((buttonView, isChecked) -> updateResult());
+        cbOption.setOnCheckedChangeListener((buttonView, isChecked) -> updateResult());
+
+        seekSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvResult.setTextSize(12 + progress);
+                updateResult();
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        updateResult();
+    }
+
+    private void updateResult() {
+        String nome = etName.getText().toString().trim();
+        if (nome.isEmpty()) nome = "Visitante";
+
+        boolean noturno = switchOption.isChecked();
+        boolean lembrar = cbOption.isChecked();
+        int tamanho     = seekSize.getProgress() + 12;
+
+        tvResult.setText(
+            "Olá, " + nome + "!\n" +
+            "Modo noturno: " + (noturno ? "ligado" : "desligado") + "\n" +
+            "Lembrar: " + (lembrar ? "sim" : "não") + "\n" +
+            "Texto: " + tamanho + "sp"
+        );
+    }
+
     @Override
     public void onBackPressed() {
         if (navDrawer.getVisibility() == View.VISIBLE) {
-            // Menu aberto → fecha o menu, não sai do app
             closeDrawer();
         } else {
-            // Menu fechado → comportamento padrão
             super.onBackPressed();
         }
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 7 — CICLO DE VIDA: onResume / onPause
-    // Gerencia o relógio conforme visibilidade do app
-    //─────────────────────────────────────────────
-
     @Override
     protected void onResume() {
         super.onResume();
-        // App voltou ao foco → inicia (ou reinicia) o relógio
         clockHandler.post(clockRunnable);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // App saiu do foco → para o relógio para economizar recursos
         clockHandler.removeCallbacks(clockRunnable);
     }
 
-
-    //─────────────────────────────────────────────
-    // BLOCO 8 — CICLO DE VIDA: onDestroy
-    // Limpeza final: remove todos os callbacks pendentes
-    //─────────────────────────────────────────────
     @Override
     protected void onDestroy() {
         super.onDestroy();
         clockHandler.removeCallbacksAndMessages(null);
     }
-
 }
 ENDOFFILE
 
@@ -512,30 +454,13 @@ echo "[5/8] Criando res/values/colors.xml..."
 
 cat > "$PROJECT/res/values/colors.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    RECURSOS DE COR — colors.xml
-    Paleta centralizada do aplicativo.
-    Altere aqui para mudar as cores em todo o app.
-    Paleta atual: Azul Índigo escuro
-=================================================-->
 <resources>
-
-    <!--── SEÇÃO SUPERIOR (Relógio) ─────────────────-->
     <color name="section_top">#1A237E</color>
-
-    <!--── SEÇÃO INFERIOR (Status + Menu) ───────────-->
     <color name="section_bottom">#283593</color>
-
-    <!--── MENU LATERAL (Drawer) ────────────────────-->
     <color name="drawer_bg">#0D1B6B</color>
-
-    <!--── TEXTOS ───────────────────────────────────-->
     <color name="text_light">#FFFFFF</color>
     <color name="text_light_dim">#90CAF9</color>
-
-    <!--── DIVISOR ──────────────────────────────────-->
     <color name="divider">#3949AB</color>
-
 </resources>
 ENDOFFILE
 
@@ -548,25 +473,13 @@ echo "[6/8] Criando res/values/strings.xml..."
 
 cat > "$PROJECT/res/values/strings.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    RECURSOS DE TEXTO — strings.xml
-    Centraliza todas as strings visíveis no app.
-    Edite aqui para alterar textos sem tocar no Java.
-=================================================-->
 <resources>
-
-    <!--── NOME DO APP ───────────────────────────────-->
     <string name="app_name">MeuApp</string>
-
-    <!--── SEÇÃO INFERIOR ───────────────────────────-->
     <string name="status_msg">&#10004; Funcionando</string>
     <string name="menu_desc">Abrir menu lateral</string>
-
-    <!--── MENU LATERAL (DRAWER) ────────────────────-->
     <string name="drawer_title">Menu</string>
     <string name="drawer_status">Sistema funcionando</string>
     <string name="close_menu_desc">Fechar menu lateral</string>
-
 </resources>
 ENDOFFILE
 
@@ -579,37 +492,12 @@ echo "[7/8] Criando res/values/themes.xml..."
 
 cat > "$PROJECT/res/values/themes.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    TEMA DO APP — themes.xml
-    Usa android:Theme.Material nativo (API 21+)
-    SEM AppCompat — compatível com pipeline ECJ/D8
-
-    Por que NoActionBar:
-      Layout usa tela cheia com seções manuais.
-      A ActionBar padrão ocuparia espaço desnecessário.
-=================================================-->
 <resources>
-
-    <!--── TEMA PRINCIPAL ───────────────────────────
-        parent: android:Theme.Material.NoActionBar
-          → Tema Material nativo do Android
-          → Sem barra de título (ActionBar)
-          → Sem dependência de AppCompat
-          → Compatível com API 21+ (target API 34)
-    ─────────────────────────────────────────────-->
     <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
-
-        <!-- Cor da status bar (barra de notificações no topo) -->
         <item name="android:statusBarColor">#1A237E</item>
-
-        <!-- Cor da navigation bar (barra de botões na base) -->
         <item name="android:navigationBarColor">#1A237E</item>
-
-        <!-- Cor de destaque para widgets interativos -->
         <item name="android:colorAccent">#5C6BC0</item>
-
     </style>
-
 </resources>
 ENDOFFILE
 
@@ -629,7 +517,7 @@ echo "  Projeto criado com sucesso!"
 echo "  Pasta: $(pwd)/$PROJECT"
 echo "========================================"
 echo ""
-echo "  Próximo passo: copie os arquivos para"
-echo "  dentro do seu projeto e rode o build.sh"
+echo "  Próximo passo:"
+echo "  cd $PROJECT && ./build.sh"
 echo "========================================"
 echo ""
