@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--=================================================
+    TEMA DO APP — themes.xml
+    Usa android:Theme.Material nativo (API 21+)
+    SEM AppCompat — compatível com pipeline ECJ/D8
+
+    Por que NoActionBar:
+      Layout usa tela cheia com seções manuais.
+      A ActionBar padrão ocuparia espaço desnecessário.
+=================================================-->
+<resources>
+
+    <!--── TEMA PRINCIPAL ───────────────────────────
+        parent: android:Theme.Material.NoActionBar
+          → Tema Material nativo do Android
+          → Sem barra de título (ActionBar)
+          → Sem dependência de AppCompat
+          → Compatível com API 21+ (target API 34)
+    ─────────────────────────────────────────────-->
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+
+        <!-- Cor da status bar (barra de notificações no topo) -->
+        <item name="android:statusBarColor">#1A237E</item>
+
+        <!-- Cor da navigation bar (barra de botões na base) -->
+        <item name="android:navigationBarColor">#1A237E</item>
+
+        <!-- Cor de destaque para widgets interativos -->
+        <item name="android:colorAccent">#5C6BC0</item>
+
+    </style>
+
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--=================================================
+    RECURSOS DE TEXTO — strings.xml
+    Centraliza todas as strings visíveis no app.
+    Edite aqui para alterar textos sem tocar no Java.
+=================================================-->
+<resources>
+
+    <!--── NOME DO APP ───────────────────────────────-->
+    <string name="app_name">MeuApp</string>
+
+    <!--── SEÇÃO INFERIOR ───────────────────────────-->
+    <string name="menu_desc">Abrir menu lateral</string>
+
+    <!--── MENU LATERAL (DRAWER) ────────────────────-->
+    <string name="drawer_title">Menu</string>
+    <string name="drawer_status">Sistema funcionando</string>
+    <string name="close_menu_desc">Fechar menu lateral</string>
+
+</resources>

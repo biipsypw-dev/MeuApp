@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--=================================================
+    LAYOUT PRINCIPAL COM ÁREA DE PRÁTICA
+    - Tela dividida em 2 (relógio + status)
+    - Menu lateral com múltiplos widgets interativos
+=================================================-->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <!--═══════════════════════════════════════════
+        CAMADA 1 — CONTEÚDO PRINCIPAL
+    ═══════════════════════════════════════════-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!--── SEÇÃO SUPERIOR: RELÓGIO ──────────────-->
+        <FrameLayout
+            android:id="@+id/section_top"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:background="@color/section_top">
+
+            <TextView
+                android:id="@+id/tv_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="00:00:00"
+                android:textSize="56sp"
+                android:textColor="@color/text_light"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.05" />
+
+        </FrameLayout>
+
+
+        <!--── SEÇÃO INFERIOR: BARRA + BOTÕES ──-->
+        <LinearLayout
+            android:id="@+id/section_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:orientation="vertical"
+            android:background="@color/section_bottom">
+
+            <!-- BARRA DE TAREFAS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/section_top"
+                android:paddingHorizontal="8dp">
+
+                <Button
+                    android:id="@+id/btn_menu"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:text="&#9776;"
+                    android:textSize="26sp"
+                    android:textColor="@color/text_light"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/menu_desc"
+                    android:padding="0dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="@string/app_name"
+                    android:textColor="@color/text_light"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+          <!-- ESPAÇO FLEXÍVEL (empurra botões para baixo) -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- ÁREA DOS BOTÕES 2x2 NO FINAL -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <!-- Linha superior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btn_1"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Alarme" />
+
+                    <Button
+                        android:id="@+id/btn_2"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Notas" />
+                </LinearLayout>
+
+                <!-- Linha inferior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btn_3"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Música" />
+
+                    <Button
+                        android:id="@+id/btn_4"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Clima" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--══ FIM CAMADA 1 ═════════════════════════-->
+
+
+    <!--═══════════════════════════════════════════
+        CAMADA 2 — MENU LATERAL COM WIDGETS DE PRÁTICA
+        Contém vários objetos interativos para testar
+    ═══════════════════════════════════════════-->
+    <FrameLayout
+        android:id="@+id/nav_drawer"
+        android:layout_width="250dp"
+        android:layout_height="match_parent"
+        android:background="@color/drawer_bg"
+        android:visibility="gone">
+
+        <!-- Botão fechar -->
+        <Button
+            android:id="@+id/btn_close_drawer"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="8dp"
+            android:text="&#10005;"
+            android:textSize="22sp"
+            android:textColor="@color/text_light"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/close_menu_desc"
+            android:padding="0dp" />
+
+
+        <!-- ScrollView permite rolar se conteúdo for grande -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginHorizontal="24dp">
+
+            <!-- Container vertical dos widgets -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+
+                <!--── Título DO MENU ─────────────────────-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/drawer_title"
+                    android:textSize="32sp"
+                    android:textColor="@color/text_light"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp" />
+
+
+                <!--── CAMPO DE TEXTO (EditText) ──────────
+                    Caixa para digitar algo
+                ─────────────────────────────────────────-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Seu nome:"
+                    android:textColor="@color/text_light_dim"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="4dp" />
+
+                <EditText
+                    android:id="@+id/et_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Digite aqui"
+                    android:textColor="@color/text_light"
+                    android:textColorHint="@color/text_light_dim"
+                    android:background="@android:drawable/edit_text"
+                    android:padding="12dp" />
+
+
+                <!--── BOTÃO DE AÇÃO ───────────────────────
+                    Dispara a ação de atualizar o resultado
+                ─────────────────────────────────────────-->
+                <Button
+                    android:id="@+id/btn_update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Atualizar"
+                    android:textColor="@color/text_light"
+                    android:background="@color/section_bottom" />
+
+
+                <!--── INTERRUPTOR (Switch) ───────────────
+                    Liga/desliga uma opção
+                ─────────────────────────────────────────-->
+                <Switch
+                    android:id="@+id/switch_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Modo noturno"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+
+                <!--── CAIXA DE MARCAÇÃO (CheckBox) ───────
+                    Marca/desmarca uma opção
+                ─────────────────────────────────────────-->
+                <CheckBox
+                    android:id="@+id/cb_option"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Lembrar preferências"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+
+                <!--── CONTROLE DESLIZANTE (SeekBar) ───────
+                    Seleciona um valor numérico
+                ─────────────────────────────────────────-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Tamanho do texto:"
+                    android:textColor="@color/text_light_dim"
+                    android:textSize="14sp" />
+
+                <SeekBar
+                    android:id="@+id/seek_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:max="50"
+                    android:progress="22" />
+
+
+                <!--── PAINEL DE RESULTADO ────────────────
+                    Mostra o estado de todos os widgets
+                ─────────────────────────────────────────-->
+                <TextView
+                    android:id="@+id/tv_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:background="@color/section_top"
+                    android:padding="16dp"
+                    android:text="Resultado aparece aqui"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </FrameLayout>
+    <!--══ FIM CAMADA 2 ═════════════════════════-->
+
+
+</FrameLayout>
