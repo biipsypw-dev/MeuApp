@@ -148,50 +148,61 @@ cat > "$PROJECT/res/layout/activity_main.xml" << 'ENDOFFILE'
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- BARRA DE BOTÕES INFERIOR -->
+            <!-- ÁREA DOS BOTÕES 2x2 NO FINAL -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:background="@color/section_top"
-                android:padding="8dp">
+                android:padding="16dp">
 
-                <Button
-                    android:id="@+id/btn_1"
-                    android:layout_width="0dp"
+                <!-- Linha superior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:minHeight="56dp"
-                    android:text="1" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
-                <Button
-                    android:id="@+id/btn_2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:minHeight="56dp"
-                    android:text="2" />
+                    <Button
+                        android:id="@+id/btn_1"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Botão 1" />
 
-                <Button
-                    android:id="@+id/btn_3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:minHeight="56dp"
-                    android:text="3" />
+                    <Button
+                        android:id="@+id/btn_2"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Botão 2" />
+                </LinearLayout>
 
-                <Button
-                    android:id="@+id/btn_4"
-                    android:layout_width="0dp"
+                <!-- Linha inferior -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:minHeight="56dp"
-                    android:text="4" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <Button
+                        android:id="@+id/btn_3"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Botão 3" />
+
+                    <Button
+                        android:id="@+id/btn_4"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_margin="4dp"
+                        android:text="Botão 4" />
+                </LinearLayout>
 
             </LinearLayout>
 
