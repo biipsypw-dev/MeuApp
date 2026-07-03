@@ -1,15 +1,11 @@
 package com.meuapp;
 
-/*=================================================
-    IMPORTS
-    Apenas classes nativas Android e Java.
-    Sem AppCompat, sem bibliotecas externas.
-=================================================*/
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -18,11 +14,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -31,102 +25,135 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-
-/**
- * =================================================
- * ACTIVITY PRINCIPAL — MainActivity.java
- *
- * Responsabilidades:
- *   1. Exibir relógio e data em tempo real
- *   2. Controlar abertura/fechamento do menu lateral
- *   3. Funcionalidades dos 4 botões:
- *      - Alarme  → abre TimePicker e define alarme
- *      - Notas   → abre editor com SharedPreferences
- *      - Música  → abre player de música do sistema
- *      - Clima   → abre previsão no navegador
- * =================================================
- */
 public class MainActivity extends Activity {
 
+    //── Seção superior: painéis ─────────────────
+    private LinearLayout panelRelogio;
+    private LinearLayout panelNotas;
+    private LinearLayout panelAlarme;
+    private LinearLayout panelMusica;
+    private LinearLayout panelClima;
 
-    //─────────────────────────────────────────────
-    // BLOCO 1 — DECLARAÇÃO DE VARIÁVEIS
-    //─────────────────────────────────────────────
+    //── Views do relógio ─────────────────────────
+    private TextView tvClock;
+    private TextView tvDate;
 
-    /* Views principais */
-    private TextView    tvClock;
-    private TextView    tvDate;
-    private TextView    tvNotaSalva;
-    private FrameLayout navDrawer;
-    private Button      btnMenu;
-    private Button      btnCloseDrawer;
+    //── Views do painel de notas ─────────────────
+    private EditText etNota;
+    private Button   btnNotaSalvar;
+    private Button   btnNotaLimpar;
+    private Button   btnNotaFechar;
 
-    /* Botões de ação */
+    //── Views do painel de alarme ─────────────────
+    private Button btnDefinirAlarme;
+    private Button btnAlarmeFechar;
+
+    //── Views do painel de música ─────────────────
+    private Button btnAbrirMusica;
+    private Button btnMusicaFechar;
+
+    //── Views do painel de clima ──────────────────
+    private Button btnAbrirClima;
+    private Button btnClimaFechar;
+
+    //── Menu lateral (drawer) ────────────────────
+    private LinearLayout navDrawer;
+    private Button       btnMenu;
+    private Button       btnCloseDrawer;
+    private View         overlay;
+
+    //── Botões de ação (grade 2×2) ───────────────
     private Button btnAlarme;
     private Button btnNotas;
     private Button btnMusica;
     private Button btnClima;
 
-    /* Relógio */
+    //── Relógio ──────────────────────────────────
     private Handler  clockHandler;
     private Runnable clockRunnable;
 
-    /* Formatos de data/hora */
     private static final SimpleDateFormat TIME_FORMAT =
             new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     private static final SimpleDateFormat DATE_FORMAT =
             new SimpleDateFormat("EEE, dd MMM yyyy", new Locale("pt", "BR"));
 
-    /* Constantes de tempo */
+    //── Constantes ───────────────────────────────
     private static final long CLOCK_INTERVAL_MS = 1000L;
-    private static final long ANIM_FADE_IN_MS   = 250L;
-    private static final long ANIM_FADE_OUT_MS  = 180L;
+    private static final int  DRAWER_ANIM_MS    = 260;
+    private static final int  DRAWER_WIDTH_DP   = 250;
 
-    /* SharedPreferences — salvar notas localmente */
-    private static final String PREFS_NAME  = "meuapp_prefs";
-    private static final String KEY_NOTA    = "ultima_nota";
+    private int drawerWidthPx; // 250dp em pixels físicos
+
+    //── Preferências ─────────────────────────────
+    private static final String PREFS_NAME = "meuapp_prefs";
+    private static final String KEY_NOTA   = "ultima_nota";
 
 
-    //─────────────────────────────────────────────
-    // BLOCO 2 — CICLO DE VIDA: onCreate
-    //─────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Converte 250dp → pixels para a animação do drawer
+        drawerWidthPx = (int)(DRAWER_WIDTH_DP * getResources().getDisplayMetrics().density);
+
         initViews();
         initClock();
         initDrawer();
         initBotoes();
-        carregarNotaSalva();
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 3 — INICIALIZAÇÃO DE VIEWS
+    // VIEWS
     //─────────────────────────────────────────────
     private void initViews() {
-        tvClock        = findViewById(R.id.tv_clock);
-        tvDate         = findViewById(R.id.tv_date);
-        tvNotaSalva    = findViewById(R.id.tv_nota_salva);
-        navDrawer      = findViewById(R.id.nav_drawer);
-        btnMenu        = findViewById(R.id.btn_menu);
-        btnCloseDrawer = findViewById(R.id.btn_close_drawer);
-        btnAlarme      = findViewById(R.id.btn_alarme);
-        btnNotas       = findViewById(R.id.btn_notas);
-        btnMusica      = findViewById(R.id.btn_musica);
-        btnClima       = findViewById(R.id.btn_clima);
+        // Painéis da seção superior
+        panelRelogio = (LinearLayout) findViewById(R.id.panel_relogio);
+        panelNotas   = (LinearLayout) findViewById(R.id.panel_notas);
+        panelAlarme  = (LinearLayout) findViewById(R.id.panel_alarme);
+        panelMusica  = (LinearLayout) findViewById(R.id.panel_musica);
+        panelClima   = (LinearLayout) findViewById(R.id.panel_clima);
+
+        // Relógio
+        tvClock = (TextView) findViewById(R.id.tv_clock);
+        tvDate  = (TextView) findViewById(R.id.tv_date);
+
+        // Painel Notas
+        etNota        = (EditText) findViewById(R.id.et_nota);
+        btnNotaSalvar = (Button)   findViewById(R.id.btn_nota_salvar);
+        btnNotaLimpar = (Button)   findViewById(R.id.btn_nota_limpar);
+        btnNotaFechar = (Button)   findViewById(R.id.btn_nota_fechar);
+
+        // Painel Alarme
+        btnDefinirAlarme = (Button) findViewById(R.id.btn_definir_alarme);
+        btnAlarmeFechar  = (Button) findViewById(R.id.btn_alarme_fechar);
+
+        // Painel Música
+        btnAbrirMusica  = (Button) findViewById(R.id.btn_abrir_musica);
+        btnMusicaFechar = (Button) findViewById(R.id.btn_musica_fechar);
+
+        // Painel Clima
+        btnAbrirClima  = (Button) findViewById(R.id.btn_abrir_clima);
+        btnClimaFechar = (Button) findViewById(R.id.btn_clima_fechar);
+
+        // Menu lateral
+        navDrawer      = (LinearLayout) findViewById(R.id.nav_drawer);
+        btnMenu        = (Button)       findViewById(R.id.btn_menu);
+        btnCloseDrawer = (Button)       findViewById(R.id.btn_close_drawer);
+        overlay        = (View)         findViewById(R.id.overlay);
+
+        // Botões de ação (grade)
+        btnAlarme = (Button) findViewById(R.id.btn_alarme);
+        btnNotas  = (Button) findViewById(R.id.btn_notas);
+        btnMusica = (Button) findViewById(R.id.btn_musica);
+        btnClima  = (Button) findViewById(R.id.btn_clima);
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 4 — RELÓGIO + DATA EM TEMPO REAL
-    // Atualiza hora e data a cada segundo
+    // RELÓGIO + DATA EM TEMPO REAL
     //─────────────────────────────────────────────
     private void initClock() {
         clockHandler = new Handler(Looper.getMainLooper());
-
         clockRunnable = new Runnable() {
             @Override
             public void run() {
@@ -138,297 +165,232 @@ public class MainActivity extends Activity {
         };
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 5 — MENU LATERAL (DRAWER)
+    // MENU LATERAL — abertura e fechamento
     //─────────────────────────────────────────────
     private void initDrawer() {
         btnMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { openDrawer(); }
+            @Override public void onClick(View v) { openDrawer(); }
         });
-
         btnCloseDrawer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) { closeDrawer(); }
+            @Override public void onClick(View v) { closeDrawer(); }
+        });
+        overlay.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { closeDrawer(); }
         });
     }
 
+    /**
+     * Abre o menu lateral com animação de slide da esquerda.
+     * 1. Define a posição inicial fora da tela (translationX negativo).
+     * 2. Torna o drawer e o overlay visíveis.
+     * 3. Anima translationX de -drawerWidthPx até 0 em 260ms.
+     */
     private void openDrawer() {
-        navDrawer.clearAnimation();
+        navDrawer.setTranslationX(-drawerWidthPx);
         navDrawer.setVisibility(View.VISIBLE);
-        AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
-        fadeIn.setDuration(ANIM_FADE_IN_MS);
-        fadeIn.setFillAfter(true);
-        navDrawer.startAnimation(fadeIn);
+        overlay.setVisibility(View.VISIBLE);
+
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                navDrawer, "translationX", -drawerWidthPx, 0f);
+        anim.setDuration(DRAWER_ANIM_MS);
+        anim.start();
     }
 
+    /**
+     * Fecha o menu lateral com animação de slide para a esquerda.
+     * Ao fim da animação, o drawer e o overlay ficam GONE.
+     */
     private void closeDrawer() {
-        navDrawer.clearAnimation();
-        final boolean[] cancelled = {false};
-        AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
-        fadeOut.setDuration(ANIM_FADE_OUT_MS);
-        fadeOut.setFillAfter(true);
-        fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation a)  {}
-            @Override public void onAnimationRepeat(Animation a) {}
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                navDrawer, "translationX", 0f, -drawerWidthPx);
+        anim.setDuration(DRAWER_ANIM_MS);
+        anim.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationEnd(Animation a) {
-                if (!cancelled[0] && navDrawer.getVisibility() == View.VISIBLE) {
-                    navDrawer.setVisibility(View.GONE);
-                }
+            public void onAnimationEnd(Animator animation) {
+                navDrawer.setVisibility(View.GONE);
+                overlay.setVisibility(View.GONE);
             }
         });
-        navDrawer.startAnimation(fadeOut);
+        anim.start();
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 6 — BOTÕES DE AÇÃO
-    // Cada botão tem uma função real
-    //─────────────────────────────────────────────
-    private void initBotoes() {
-
-        /*── ALARME ─────────────────────────────────
-         * Abre um TimePicker para o usuário escolher
-         * a hora, depois tenta criar o alarme via
-         * Intent padrão do sistema.
-         ────────────────────────────────────────────*/
-        btnAlarme.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirAlarme();
-            }
-        });
-
-        /*── NOTAS ───────────────────────────────────
-         * Abre um AlertDialog com EditText.
-         * A nota é salva em SharedPreferences e
-         * exibida no menu lateral.
-         ────────────────────────────────────────────*/
-        btnNotas.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirNotas();
-            }
-        });
-
-        /*── MÚSICA ──────────────────────────────────
-         * Abre o player de música padrão do sistema
-         * via Intent com categoria APP_MUSIC.
-         ────────────────────────────────────────────*/
-        btnMusica.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirMusica();
-            }
-        });
-
-        /*── CLIMA ───────────────────────────────────
-         * Abre a previsão do tempo no navegador
-         * usando a URL do Google Clima.
-         ────────────────────────────────────────────*/
-        btnClima.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirClima();
-            }
-        });
-    }
-
-
-    //─────────────────────────────────────────────
-    // BLOCO 7 — IMPLEMENTAÇÃO DO ALARME
+    // TROCA DE PAINÉIS — seção superior
     //─────────────────────────────────────────────
 
     /**
-     * Abre um TimePickerDialog (relógio visual para
-     * escolher hora e minuto), depois dispara o
-     * alarme via Intent ACTION_SET_ALARM.
-     *
-     * O Android abre automaticamente o app de relógio
-     * do sistema com o horário já preenchido.
+     * Esconde todos os painéis e exibe somente o solicitado.
      */
-    private void abrirAlarme() {
-        // Pega hora atual para pré-preencher o picker
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        int horaAtual   = cal.get(java.util.Calendar.HOUR_OF_DAY);
-        int minutoAtual = cal.get(java.util.Calendar.MINUTE);
+    private void mostrarPanel(LinearLayout painel) {
+        panelRelogio.setVisibility(View.GONE);
+        panelNotas.setVisibility(View.GONE);
+        panelAlarme.setVisibility(View.GONE);
+        panelMusica.setVisibility(View.GONE);
+        panelClima.setVisibility(View.GONE);
+        painel.setVisibility(View.VISIBLE);
+    }
 
-        // Abre o seletor de hora (formato 24h)
-        TimePickerDialog picker = new TimePickerDialog(
-            this,
+    //─────────────────────────────────────────────
+    // BOTÕES DE AÇÃO + BOTÕES DOS PAINÉIS
+    //─────────────────────────────────────────────
+    private void initBotoes() {
+
+        // ── Grade 2×2: abre o painel correspondente ──
+        btnAlarme.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelAlarme); }
+        });
+        btnNotas.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { abrirPainelNotas(); }
+        });
+        btnMusica.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelMusica); }
+        });
+        btnClima.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelClima); }
+        });
+
+        // ── Painel Notas ──────────────────────────────
+        btnNotaSalvar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { salvarNota(); }
+        });
+        btnNotaLimpar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { etNota.setText(""); }
+        });
+        btnNotaFechar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelRelogio); }
+        });
+
+        // ── Painel Alarme ─────────────────────────────
+        btnDefinirAlarme.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { abrirTimePicker(); }
+        });
+        btnAlarmeFechar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelRelogio); }
+        });
+
+        // ── Painel Música ─────────────────────────────
+        btnAbrirMusica.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { lancarPlayer(); }
+        });
+        btnMusicaFechar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelRelogio); }
+        });
+
+        // ── Painel Clima ──────────────────────────────
+        btnAbrirClima.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { abrirNavegadorClima(); }
+        });
+        btnClimaFechar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { mostrarPanel(panelRelogio); }
+        });
+    }
+
+    //─────────────────────────────────────────────
+    // NOTAS — painel inline
+    //─────────────────────────────────────────────
+    private void abrirPainelNotas() {
+        // Carrega nota salva no EditText antes de mostrar o painel
+        String notaSalva = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_NOTA, "");
+        etNota.setText(notaSalva);
+        if (!notaSalva.isEmpty()) {
+            etNota.setSelection(notaSalva.length());
+        }
+        mostrarPanel(panelNotas);
+    }
+
+    private void salvarNota() {
+        String nota = etNota.getText().toString().trim();
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit().putString(KEY_NOTA, nota).apply();
+        Toast.makeText(this, getString(R.string.notas_salvo), Toast.LENGTH_SHORT).show();
+        mostrarPanel(panelRelogio);
+    }
+
+    //─────────────────────────────────────────────
+    // ALARME — TimePicker abre sobre o painel
+    //─────────────────────────────────────────────
+    private void abrirTimePicker() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int hora   = cal.get(java.util.Calendar.HOUR_OF_DAY);
+        int minuto = cal.get(java.util.Calendar.MINUTE);
+
+        new TimePickerDialog(this,
             new TimePickerDialog.OnTimeSetListener() {
                 @Override
-                public void onTimeSet(TimePicker view, int hora, int minuto) {
-
-                    // Tenta abrir o app de alarme do sistema
+                public void onTimeSet(TimePicker view, int h, int m) {
                     try {
                         Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM);
-                        intent.putExtra(AlarmClock.EXTRA_HOUR, hora);
-                        intent.putExtra(AlarmClock.EXTRA_MINUTES, minuto);
+                        intent.putExtra(AlarmClock.EXTRA_HOUR, h);
+                        intent.putExtra(AlarmClock.EXTRA_MINUTES, m);
                         intent.putExtra(AlarmClock.EXTRA_MESSAGE, "MeuApp");
                         intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
                         startActivity(intent);
                     } catch (Exception e) {
-                        // Fallback: mostra confirmação em toast
-                        String msg = String.format(
-                            Locale.getDefault(),
-                            "Alarme definido para %02d:%02d", hora, minuto
-                        );
+                        String msg = String.format(Locale.getDefault(),
+                                "Alarme definido para %02d:%02d", h, m);
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                     }
                 }
             },
-            horaAtual,
-            minutoAtual,
-            true // formato 24h
-        );
-
-        picker.setTitle("Definir alarme");
-        picker.show();
+            hora, minuto, true
+        ).show();
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 8 — IMPLEMENTAÇÃO DAS NOTAS
+    // MÚSICA — Intent para player do sistema
     //─────────────────────────────────────────────
-
-    /**
-     * Abre um AlertDialog com EditText.
-     * Carrega a nota salva anteriormente (se existir).
-     * Ao salvar, grava em SharedPreferences e
-     * atualiza o TextView no menu lateral.
-     */
-    private void abrirNotas() {
-        // Cria o campo de texto para digitar a nota
-        final EditText editNota = new EditText(this);
-        editNota.setHint(getString(R.string.notas_hint));
-        editNota.setMinLines(4);
-        editNota.setMaxLines(8);
-        editNota.setGravity(android.view.Gravity.TOP);
-        editNota.setPadding(32, 24, 32, 24);
-
-        // Carrega nota salva anteriormente
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String notaExistente = prefs.getString(KEY_NOTA, "");
-        if (!notaExistente.isEmpty()) {
-            editNota.setText(notaExistente);
-            editNota.setSelection(notaExistente.length()); // cursor no final
-        }
-
-        // Monta o diálogo
-        new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.notas_titulo))
-            .setView(editNota)
-            .setPositiveButton(getString(R.string.notas_salvar), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String nota = editNota.getText().toString().trim();
-                    salvarNota(nota);
-                }
-            })
-            .setNeutralButton(getString(R.string.notas_limpar), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    salvarNota("");
-                }
-            })
-            .setNegativeButton(getString(R.string.notas_cancelar), null)
-            .show();
-    }
-
-    /** Salva a nota em SharedPreferences e atualiza a UI */
-    private void salvarNota(String nota) {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_NOTA, nota).apply();
-
-        // Atualiza o TextView no menu lateral
-        if (tvNotaSalva != null) {
-            tvNotaSalva.setText(nota.isEmpty() ? "Nenhuma nota ainda." : nota);
-        }
-
-        Toast.makeText(this, getString(R.string.notas_salvo), Toast.LENGTH_SHORT).show();
-    }
-
-    /** Carrega a nota salva ao abrir o app */
-    private void carregarNotaSalva() {
-        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String nota = prefs.getString(KEY_NOTA, "");
-        if (tvNotaSalva != null && !nota.isEmpty()) {
-            tvNotaSalva.setText(nota);
-        }
-    }
-
-
-    //─────────────────────────────────────────────
-    // BLOCO 9 — IMPLEMENTAÇÃO DE MÚSICA
-    //─────────────────────────────────────────────
-
-    /**
-     * Tenta abrir o player de música do sistema.
-     * Usa a categoria APP_MUSIC do Intent.
-     * Se não encontrar nenhum app de música,
-     * mostra um Toast informando.
-     */
-    private void abrirMusica() {
+    private void lancarPlayer() {
         try {
             Intent intent = new Intent(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_APP_MUSIC);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } catch (Exception e) {
-            // Fallback: abre gerenciador de arquivos de áudio
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setType("audio/*");
                 startActivity(intent);
             } catch (Exception e2) {
                 Toast.makeText(this,
-                    "Nenhum player de música encontrado.",
-                    Toast.LENGTH_SHORT).show();
+                        "Nenhum player de musica encontrado.",
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 10 — IMPLEMENTAÇÃO DO CLIMA
+    // CLIMA — Abre previsão no navegador
     //─────────────────────────────────────────────
-
-    /**
-     * Abre a previsão do tempo no navegador.
-     * Usa o Google Clima (weather.com via busca).
-     * Se não houver navegador, mostra Toast.
-     */
-    private void abrirClima() {
+    private void abrirNavegadorClima() {
         try {
             Uri uri = Uri.parse("https://www.google.com/search?q=previsao+do+tempo");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            startActivity(intent);
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (Exception e) {
             Toast.makeText(this,
-                "Nenhum navegador encontrado.",
-                Toast.LENGTH_SHORT).show();
+                    "Nenhum navegador encontrado.",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 11 — BOTÃO VOLTAR
+    // BOTÃO VOLTAR
     //─────────────────────────────────────────────
     @Override
     public void onBackPressed() {
         if (navDrawer.getVisibility() == View.VISIBLE) {
             closeDrawer();
+        } else if (panelRelogio.getVisibility() != View.VISIBLE) {
+            // Qualquer painel aberto → volta pro relógio
+            mostrarPanel(panelRelogio);
         } else {
             super.onBackPressed();
         }
     }
 
-
     //─────────────────────────────────────────────
-    // BLOCO 12 — CICLO DE VIDA: onResume / onPause / onDestroy
+    // CICLO DE VIDA
     //─────────────────────────────────────────────
     @Override
     protected void onResume() {
@@ -447,5 +409,4 @@ public class MainActivity extends Activity {
         super.onDestroy();
         clockHandler.removeCallbacksAndMessages(null);
     }
-
 }

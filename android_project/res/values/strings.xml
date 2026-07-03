@@ -1,41 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--=================================================
-    RECURSOS DE TEXTO — strings.xml
-    Centraliza todas as strings visíveis no app.
-=================================================-->
 <resources>
-
-    <!--── NOME DO APP ───────────────────────────────-->
     <string name="app_name">MeuApp</string>
-
-    <!--── BARRA DE TAREFAS ─────────────────────────-->
     <string name="menu_desc">Abrir menu lateral</string>
     <string name="status_ativo">&#9679; Sistema ativo</string>
-
-    <!--── BOTÕES PRINCIPAIS ────────────────────────-->
-    <string name="btn_alarme">&#9200;\nAlarme</string>
-    <string name="btn_notas">&#128221;\nNotas</string>
-    <string name="btn_musica">&#127925;\nMúsica</string>
-    <string name="btn_clima">&#127780;\nClima</string>
-
-    <!--── MENU LATERAL (DRAWER) ────────────────────-->
-    <string name="drawer_title">Menu</string>
     <string name="close_menu_desc">Fechar menu lateral</string>
-
-    <!--── NOTAS ────────────────────────────────────-->
-    <string name="notas_titulo">Minhas Notas</string>
+    <string name="drawer_title">Menu</string>
     <string name="notas_hint">Digite sua nota aqui...</string>
     <string name="notas_salvar">Salvar</string>
     <string name="notas_cancelar">Cancelar</string>
     <string name="notas_salvo">Nota salva!</string>
     <string name="notas_limpar">Limpar</string>
-
-    <!--── ALARME ───────────────────────────────────-->
-    <string name="alarme_titulo">Alarme</string>
-    <string name="alarme_msg">Abrindo o relógio do sistema...</string>
-
-    <!--── CLIMA ────────────────────────────────────-->
-    <string name="clima_titulo">Clima</string>
-    <string name="clima_msg">Abrindo previsão do tempo...</string>
-
 </resources>

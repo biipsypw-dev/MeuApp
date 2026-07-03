@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--=================================================
     LAYOUT PRINCIPAL — activity_main.xml
-    Estrutura:
+
+    Estrutura (3 camadas no FrameLayout raiz):
       CAMADA 1 — Conteúdo principal
-        ├─ Seção superior: Relógio + Data
-        └─ Seção inferior: Toolbar + Botões 2x2
-      CAMADA 2 — Menu lateral (sobreposto)
+        ├─ Seção superior (40%): 5 painéis (um visível por vez)
+        │    ├─ panel_relogio  — padrão: relógio + data
+        │    ├─ panel_notas   — editor de notas inline
+        │    ├─ panel_alarme  — botão para definir alarme
+        │    ├─ panel_musica  — botão para abrir player
+        │    └─ panel_clima   — botão para abrir previsão
+        └─ Seção inferior (60%): Toolbar + Botões 2×2
+      CAMADA 2 — Overlay escuro (fecha menu ao tocar)
+      CAMADA 3 — Menu lateral deslizante (250dp, slide da esquerda)
 =================================================-->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,23 +29,26 @@
         android:orientation="vertical">
 
 
-        <!--── SEÇÃO SUPERIOR: RELÓGIO + DATA ───────-->
+        <!--── SEÇÃO SUPERIOR: PAINÉIS DE CONTEÚDO ───-->
+        <!--  Todos os painéis vivem aqui sobrepostos.   -->
+        <!--  Apenas um fica VISIBLE por vez (via Java). -->
         <FrameLayout
             android:id="@+id/section_top"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
+            android:layout_weight="4"
             android:background="@color/section_top">
 
-            <!-- Centraliza relógio e data verticalmente -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical"
-                android:gravity="center">
 
-                <!-- Relógio principal -->
+            <!--┄┄ PAINEL 1: RELÓGIO (padrão) ┄┄┄┄┄┄-->
+            <LinearLayout
+                android:id="@+id/panel_relogio"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
+
                 <TextView
                     android:id="@+id/tv_clock"
                     android:layout_width="wrap_content"
@@ -49,19 +59,251 @@
                     android:fontFamily="monospace"
                     android:letterSpacing="0.05" />
 
-                <!-- Data abaixo do relógio -->
                 <TextView
                     android:id="@+id/tv_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="6dp"
                     android:text="Seg, 01 Jan 2025"
                     android:textSize="16sp"
                     android:textColor="@color/text_date"
                     android:letterSpacing="0.08" />
 
             </LinearLayout>
+            <!--┄┄ FIM PAINEL 1 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+
+
+            <!--┄┄ PAINEL 2: NOTAS ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+            <LinearLayout
+                android:id="@+id/panel_notas"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#128221; Notas"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light"
+                    android:layout_marginBottom="12dp" />
+
+                <EditText
+                    android:id="@+id/et_nota"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:hint="@string/notas_hint"
+                    android:textColor="@color/text_light"
+                    android:textColorHint="@color/text_date"
+                    android:background="@drawable/bg_edittext"
+                    android:padding="12dp"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:textSize="15sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
+
+                    <Button
+                        android:id="@+id/btn_nota_salvar"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/notas_salvar"
+                        android:textColor="@color/text_light"
+                        android:textSize="13sp"
+                        android:background="@drawable/btn_notas" />
+
+                    <Button
+                        android:id="@+id/btn_nota_limpar"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:text="@string/notas_limpar"
+                        android:textColor="@color/text_light"
+                        android:textSize="13sp"
+                        android:background="@drawable/btn_neutral" />
+
+                    <Button
+                        android:id="@+id/btn_nota_fechar"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:text="&#10005;"
+                        android:textColor="@color/text_light"
+                        android:textSize="16sp"
+                        android:background="@drawable/btn_neutral" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+            <!--┄┄ FIM PAINEL 2 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+
+
+            <!--┄┄ PAINEL 3: ALARME ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+            <LinearLayout
+                android:id="@+id/panel_alarme"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#9200; Alarme"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="Defina um horario para ser lembrado."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_date"
+                    android:gravity="center" />
+
+                <Button
+                    android:id="@+id/btn_definir_alarme"
+                    android:layout_width="200dp"
+                    android:layout_height="48dp"
+                    android:text="Escolher Horario"
+                    android:textColor="@color/text_light"
+                    android:textSize="14sp"
+                    android:background="@drawable/btn_alarme" />
+
+                <Button
+                    android:id="@+id/btn_alarme_fechar"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Fechar"
+                    android:textColor="@color/text_light"
+                    android:textSize="13sp"
+                    android:background="@drawable/btn_neutral" />
+
+            </LinearLayout>
+            <!--┄┄ FIM PAINEL 3 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+
+
+            <!--┄┄ PAINEL 4: MÚSICA ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+            <LinearLayout
+                android:id="@+id/panel_musica"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#127925; Musica"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="Abre o reprodutor padrao do dispositivo."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_date"
+                    android:gravity="center" />
+
+                <Button
+                    android:id="@+id/btn_abrir_musica"
+                    android:layout_width="200dp"
+                    android:layout_height="48dp"
+                    android:text="Abrir Player"
+                    android:textColor="@color/text_light"
+                    android:textSize="14sp"
+                    android:background="@drawable/btn_musica" />
+
+                <Button
+                    android:id="@+id/btn_musica_fechar"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Fechar"
+                    android:textColor="@color/text_light"
+                    android:textSize="13sp"
+                    android:background="@drawable/btn_neutral" />
+
+            </LinearLayout>
+            <!--┄┄ FIM PAINEL 4 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+
+
+            <!--┄┄ PAINEL 5: CLIMA ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+            <LinearLayout
+                android:id="@+id/panel_clima"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#127780; Clima"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_light" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="20dp"
+                    android:text="Consulta a previsao do tempo no navegador."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_date"
+                    android:gravity="center" />
+
+                <Button
+                    android:id="@+id/btn_abrir_clima"
+                    android:layout_width="200dp"
+                    android:layout_height="48dp"
+                    android:text="Ver Previsao"
+                    android:textColor="@color/text_light"
+                    android:textSize="14sp"
+                    android:background="@drawable/btn_clima" />
+
+                <Button
+                    android:id="@+id/btn_clima_fechar"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Fechar"
+                    android:textColor="@color/text_light"
+                    android:textSize="13sp"
+                    android:background="@drawable/btn_neutral" />
+
+            </LinearLayout>
+            <!--┄┄ FIM PAINEL 5 ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄-->
+
+
         </FrameLayout>
+        <!--── FIM SEÇÃO SUPERIOR ────────────────────-->
 
 
         <!--── SEÇÃO INFERIOR: TOOLBAR + BOTÕES ─────-->
@@ -69,14 +311,12 @@
             android:id="@+id/section_bottom"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8"
+            android:layout_weight="6"
             android:orientation="vertical"
             android:background="@color/section_bottom">
 
 
-            <!--── TOOLBAR ───────────────────────────
-                Barra com botão de menu e status
-            ────────────────────────────────────────-->
+            <!--── TOOLBAR ───────────────────────────-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
@@ -86,7 +326,6 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="16dp">
 
-                <!-- Botão hambúrguer -->
                 <Button
                     android:id="@+id/btn_menu"
                     android:layout_width="48dp"
@@ -98,7 +337,6 @@
                     android:contentDescription="@string/menu_desc"
                     android:padding="0dp" />
 
-                <!-- Nome do app -->
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -109,7 +347,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- Indicador de status -->
                 <TextView
                     android:id="@+id/tv_status"
                     android:layout_width="wrap_content"
@@ -128,9 +365,7 @@
                 android:layout_weight="1" />
 
 
-            <!--── GRADE DE BOTÕES 2x2 ────────────────
-                Cada botão tem cor, ícone e rótulo
-            ────────────────────────────────────────-->
+            <!--── GRADE DE BOTÕES 2×2 ────────────────-->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -183,7 +418,7 @@
                         android:layout_height="90dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        android:text="&#127925;&#10;Música"
+                        android:text="&#127925;&#10;Musica"
                         android:textColor="@color/text_light"
                         android:textSize="14sp"
                         android:background="@drawable/btn_musica" />
@@ -210,102 +445,175 @@
 
 
     <!--═══════════════════════════════════════════
-        CAMADA 2 — MENU LATERAL
-        Sobrepõe a CAMADA 1 quando aberto.
-        Largura fixa de 250dp.
+        CAMADA 2 — OVERLAY (fecha o menu ao tocar)
+        Aparece entre o conteúdo e o drawer.
     ═══════════════════════════════════════════-->
-    <FrameLayout
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
+    <!--══ FIM CAMADA 2 ═════════════════════════-->
+
+
+    <!--═══════════════════════════════════════════
+        CAMADA 3 — MENU LATERAL DESLIZANTE
+        Começa fora da tela (translationX = -250dp).
+        O Java anima até translationX = 0 ao abrir.
+    ═══════════════════════════════════════════-->
+    <LinearLayout
         android:id="@+id/nav_drawer"
         android:layout_width="250dp"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:background="@color/drawer_bg"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:elevation="8dp">
 
-        <!-- Botão fechar (X) -->
-        <Button
-            android:id="@+id/btn_close_drawer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="top|start"
-            android:layout_margin="8dp"
-            android:text="&#10005;"
-            android:textSize="20sp"
-            android:textColor="@color/text_light"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/close_menu_desc"
-            android:padding="0dp" />
+        <!-- Cabeçalho do menu: botão X + título -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="12dp">
+
+            <Button
+                android:id="@+id/btn_close_drawer"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="&#10005;"
+                android:textSize="20sp"
+                android:textColor="@color/text_light"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/close_menu_desc"
+                android:padding="0dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/drawer_title"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_light" />
+
+        </LinearLayout>
+
+        <!-- Divisor abaixo do cabeçalho -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
 
         <!-- Conteúdo rolável do menu -->
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="64dp">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
                 android:paddingBottom="24dp">
 
-                <!-- Título -->
+                <!-- Legenda "Em breve" -->
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/drawer_title"
-                    android:textSize="26sp"
-                    android:textColor="@color/text_light"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="24dp" />
-
-                <!-- Divisor -->
-                <View
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Item: Nota salva -->
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Última nota:"
+                    android:text="Em breve..."
+                    android:textSize="11sp"
                     android:textColor="@color/text_date"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="4dp" />
+                    android:paddingStart="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="10dp"
+                    android:letterSpacing="0.1" />
 
+                <!-- Item: Configurações -->
                 <TextView
-                    android:id="@+id/tv_nota_salva"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nenhuma nota ainda."
-                    android:textColor="@color/text_light"
-                    android:textSize="14sp"
-                    android:background="@color/drawer_item_bg"
-                    android:padding="12dp" />
+                    android:text="&#9881;  Configuracoes"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_light_dim"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp" />
 
-                <!-- Divisor -->
-                <View
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" />
+
+                <!-- Item: Notificações -->
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_height="wrap_content"
+                    android:text="&#128276;  Notificacoes"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_light_dim"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp" />
 
-                <!-- Versão do app -->
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" />
+
+                <!-- Item: Estatísticas -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="&#128202;  Estatisticas"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_light_dim"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp" />
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" />
+
+                <!-- Item: Personalizar -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="&#127912;  Personalizar"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_light_dim"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp" />
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" />
+
+                <!-- Item: Sobre -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="&#9432;  Sobre o App"
+                    android:textSize="15sp"
+                    android:textColor="@color/text_light_dim"
+                    android:paddingStart="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp" />
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" />
+
+                <!-- Versão no rodapé -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Versão 1.0"
-                    android:textColor="@color/text_date"
-                    android:textSize="12sp" />
+                    android:text="Versao 1.0"
+                    android:textColor="@color/divider"
+                    android:textSize="11sp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="24dp" />
 
             </LinearLayout>
         </ScrollView>
 
-    </FrameLayout>
-    <!--══ FIM CAMADA 2 ═════════════════════════-->
+    </LinearLayout>
+    <!--══ FIM CAMADA 3 ═════════════════════════-->
 
 
 </FrameLayout>
