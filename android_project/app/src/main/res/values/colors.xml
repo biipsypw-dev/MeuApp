@@ -3,33 +3,24 @@
     RECURSOS DE COR — colors.xml
     Paleta centralizada do aplicativo.
     Altere aqui para mudar as cores em todo o app.
-
-    Paleta atual: Azul escuro / Índigo
+    Paleta atual: Azul Índigo escuro
 =================================================-->
 <resources>
 
-    <!--── SEÇÃO SUPERIOR (Relógio) ─────────────────
-        Fundo da metade de cima da tela
-    ─────────────────────────────────────────────-->
-    <color name="section_top">#1A237E</color>       <!-- Azul índigo escuro -->
+    <!--── SEÇÃO SUPERIOR (Relógio) ─────────────────-->
+    <color name="section_top">#1A237E</color>
 
-    <!--── SEÇÃO INFERIOR (Status + Menu) ───────────
-        Fundo da metade de baixo da tela
-        Ligeiramente mais claro que o topo
-    ─────────────────────────────────────────────-->
-    <color name="section_bottom">#283593</color>    <!-- Azul índigo médio -->
+    <!--── SEÇÃO INFERIOR (Status + Menu) ───────────-->
+    <color name="section_bottom">#283593</color>
 
-    <!--── MENU LATERAL (Drawer) ────────────────────
-        Fundo da tela do menu sobreposto
-        Mais escuro para criar hierarquia visual
-    ─────────────────────────────────────────────-->
-    <color name="drawer_bg">#0D1B6B</color>         <!-- Azul índigo muito escuro -->
+    <!--── MENU LATERAL (Drawer) ────────────────────-->
+    <color name="drawer_bg">#0D1B6B</color>
 
     <!--── TEXTOS ───────────────────────────────────-->
-    <color name="text_light">#FFFFFF</color>         <!-- Branco puro — títulos e valores -->
-    <color name="text_light_dim">#90CAF9</color>     <!-- Azul claro — textos secundários -->
+    <color name="text_light">#FFFFFF</color>
+    <color name="text_light_dim">#90CAF9</color>
 
     <!--── DIVISOR ──────────────────────────────────-->
-    <color name="divider">#3949AB</color>            <!-- Linha separadora no menu -->
+    <color name="divider">#3949AB</color>
 
 </resources>

@@ -6,26 +6,16 @@
 =================================================-->
 <resources>
 
-    <!--── NOME DO APP ───────────────────────────────
-        Exibido na launcher e na barra de tarefas
-    ─────────────────────────────────────────────-->
+    <!--── NOME DO APP ───────────────────────────────-->
     <string name="app_name">MeuApp</string>
 
     <!--── SEÇÃO INFERIOR ───────────────────────────-->
-    <!-- Mensagem centralizada na metade inferior da tela -->
-    <string name="status_msg">✔ Funcionando</string>
-
-    <!-- Acessibilidade: descrição do botão ☰ para leitores de tela -->
+    <string name="status_msg">&#10004; Funcionando</string>
     <string name="menu_desc">Abrir menu lateral</string>
 
     <!--── MENU LATERAL (DRAWER) ────────────────────-->
-    <!-- Título exibido no centro do menu -->
     <string name="drawer_title">Menu</string>
-
-    <!-- Mensagem de status exibida abaixo do título -->
     <string name="drawer_status">Sistema funcionando</string>
-
-    <!-- Acessibilidade: descrição do botão ✕ de fechar -->
     <string name="close_menu_desc">Fechar menu lateral</string>
 
 </resources>

@@ -2,7 +2,7 @@
 <!--=================================================
     MANIFESTO DO APLICATIVO
     Define permissões e componentes do app
-    Não requer permissões especiais (sem internet, GPS etc.)
+    Não requer permissões especiais
 =================================================-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example">

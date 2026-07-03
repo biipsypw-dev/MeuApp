@@ -98,8 +98,8 @@ public class MainActivity extends Activity {
     // a cada segundo enquanto o app está em foco.
     //
     // Fluxo:
-    //   onResume()  → clockHandler.post()  → inicia
-    //   onPause()   → removeCallbacks()    → para
+    //   onResume() → clockHandler.post() → inicia
+    //   onPause()  → removeCallbacks()   → para
     //─────────────────────────────────────────────
     private void initClock() {
         // Handler vinculado à thread principal (UI thread)
@@ -114,7 +114,6 @@ public class MainActivity extends Activity {
                 tvClock.setText(horaAtual);
 
                 // Reagenda a si mesmo para daqui a 1 segundo
-                // (padrão de relógio auto-sustentado)
                 clockHandler.postDelayed(this, CLOCK_INTERVAL_MS);
             }
         };
@@ -125,7 +124,7 @@ public class MainActivity extends Activity {
 
     //─────────────────────────────────────────────
     // BLOCO 5 — MENU LATERAL (DRAWER)
-    // Configura os listeners dos botões de abrir e fechar
+    // Configura os listeners dos botões abrir/fechar
     //─────────────────────────────────────────────
     private void initDrawer() {
 
@@ -153,34 +152,28 @@ public class MainActivity extends Activity {
      */
     private void openDrawer() {
         // Cancela animação anterior (ex: fade-out interrompido)
-        // e força o estado visível antes de animar
         navDrawer.clearAnimation();
         navDrawer.setVisibility(View.VISIBLE);
-        navDrawer.setAlpha(1f); // garante alpha correto após clearAnimation
 
-        // Fade: transparente → opaco em ANIM_FADE_IN_MS ms
+        // Fade: transparente → opaco
         AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
         fadeIn.setDuration(ANIM_FADE_IN_MS);
-        fadeIn.setFillAfter(true); // mantém estado final após animação
+        fadeIn.setFillAfter(true);
         navDrawer.startAnimation(fadeIn);
     }
 
     /**
      * Fecha o menu lateral com animação de fade-out.
-     * Cancela qualquer animação em andamento antes de iniciar.
      * O GONE é aplicado somente ao fim da animação (via listener).
-     * O flag isCancelled evita que listeners stale apliquem GONE
-     * depois que o drawer já foi reaberto.
+     * Flag local evita que listener stale aplique GONE após reabertura.
      */
     private void closeDrawer() {
-        // Cancela animação anterior (ex: fade-in interrompido)
         navDrawer.clearAnimation();
 
-        // Flag local: detecta se esta instância de animação foi
-        // substituída por outra antes de terminar
+        // Flag local: detecta se esta animação foi substituída antes de terminar
         final boolean[] cancelled = {false};
 
-        // Fade: opaco → transparente em ANIM_FADE_OUT_MS ms
+        // Fade: opaco → transparente
         AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
         fadeOut.setDuration(ANIM_FADE_OUT_MS);
         fadeOut.setFillAfter(true);
@@ -192,7 +185,6 @@ public class MainActivity extends Activity {
             @Override
             public void onAnimationEnd(Animation a) {
                 // Aplica GONE apenas se o drawer não foi reaberto
-                // enquanto esta animação rodava
                 if (!cancelled[0] && navDrawer.getVisibility() == View.VISIBLE) {
                     navDrawer.setVisibility(View.GONE);
                 }
@@ -213,7 +205,7 @@ public class MainActivity extends Activity {
             // Menu aberto → fecha o menu, não sai do app
             closeDrawer();
         } else {
-            // Menu fechado → comportamento padrão (sai ou volta)
+            // Menu fechado → comportamento padrão
             super.onBackPressed();
         }
     }
@@ -246,7 +238,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Remove clockRunnable e qualquer outro callback/mensagem
         clockHandler.removeCallbacksAndMessages(null);
     }
 
