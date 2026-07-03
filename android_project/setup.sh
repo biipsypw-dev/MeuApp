@@ -18,7 +18,7 @@ echo "========================================"
 #─────────────────────────────────────────────
 echo "[1/8] Criando estrutura de diretórios..."
 
-mkdir -p "$PROJECT/app/src/main/java/com/example"
+mkdir -p "$PROJECT/app/src/main/java/com/MeuApp"
 mkdir -p "$PROJECT/app/src/main/res/layout"
 mkdir -p "$PROJECT/app/src/main/res/values"
 
@@ -32,7 +32,7 @@ echo "[2/8] Criando AndroidManifest.xml..."
 cat > "$PROJECT/app/src/main/AndroidManifest.xml" << 'ENDOFFILE'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example">
+    package="com.MeuApp">
 
     <application
         android:allowBackup="true"
@@ -250,8 +250,8 @@ echo "      OK"
 #─────────────────────────────────────────────
 echo "[4/8] Criando java/com/example/MainActivity.java..."
 
-cat > "$PROJECT/app/src/main/java/com/example/MainActivity.java" << 'ENDOFFILE'
-package com.example;
+cat > "$PROJECT/app/src/main/java/com/MeuApp/MainActivity.java" << 'ENDOFFILE'
+package com.MeuApp;
 
 /*=================================================
     IMPORTS
